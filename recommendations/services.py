@@ -157,16 +157,23 @@ def _build_evidence(assessment, finding):
     inspection = assessment.inspection
 
     return {
+        **_build_assessment_evidence(assessment),
         "finding_code": finding.get("code"),
         "finding_level": finding.get("level"),
         "finding_message": finding.get("message"),
-        "inspection_id": inspection.pk,
         "inspection_date": inspection.inspection_date.isoformat(),
-        "crop_stage": inspection.crop_stage,
         "crop_condition": inspection.crop_condition,
         "soil_moisture": inspection.soil_moisture,
         "weed_pressure": inspection.weed_pressure,
         "pest_or_disease_signs": inspection.pest_or_disease_signs,
+    }
+
+
+def _build_assessment_evidence(assessment):
+    inspection = assessment.inspection
+    return {
+        "inspection_id": inspection.pk,
+        "crop_stage": inspection.crop_stage,
         "planting_stations_observed": inspection.planting_stations_observed,
         "stations_with_emergence": inspection.stations_with_emergence,
         "healthy_plant_count": inspection.healthy_plant_count,
@@ -292,11 +299,11 @@ def generate_recommendations(assessment):
             ),
             "priority": Recommendation.Priority.HIGH,
             "evidence": {
+                **_build_assessment_evidence(assessment),
                 "assessment_status": assessment.status,
                 "finding_codes": [
                     finding.get("code") for finding in unknown_attention
                 ],
-                "inspection_id": assessment.inspection_id,
             },
             "rule_version": RULE_VERSION,
             "is_active": True,
@@ -317,11 +324,11 @@ def generate_recommendations(assessment):
             ),
             "priority": Recommendation.Priority.MEDIUM,
             "evidence": {
+                **_build_assessment_evidence(assessment),
                 "assessment_status": assessment.status,
                 "finding_codes": [
                     finding.get("code") for finding in unknown_monitoring
                 ],
-                "inspection_id": assessment.inspection_id,
             },
             "rule_version": RULE_VERSION,
             "is_active": True,
@@ -362,8 +369,8 @@ def generate_recommendations(assessment):
             "recommended_action": action,
             "priority": priority,
             "evidence": {
+                **_build_assessment_evidence(assessment),
                 "assessment_status": assessment.status,
-                "inspection_id": assessment.inspection_id,
             },
             "rule_version": RULE_VERSION,
             "is_active": True,

@@ -3,18 +3,27 @@
 {% block content %}
 <div class="container">
 
-    {% with planting=recommendation.assessment.inspection.planting_attempt %}
+    {% with planting=recommendation.planting_attempt inspection=recommendation.source_inspection %}
     <div class="page-header">
         <div>
             <h1>Recommendation Details</h1>
             <p>{{ recommendation.title }}</p>
         </div>
 
-        <a href="{% url 'recommendations:update' recommendation.pk %}"
-           class="btn btn-primary">
-            Update Progress
-        </a>
+        {% if recommendation.is_active %}
+            <a href="{% url 'recommendations:update' recommendation.pk %}"
+               class="btn btn-primary">
+                Update Progress
+            </a>
+        {% endif %}
     </div>
+
+    {% if not recommendation.is_active %}
+        <div class="card">
+            <h2>History</h2>
+            <p>This recommendation is inactive and kept as a record of a previous guidance episode. Its progress is read-only.</p>
+        </div>
+    {% endif %}
 
     <div class="card">
         <div class="recommendation-detail-heading">
@@ -63,20 +72,22 @@
             <dt>Planting Date</dt>
             <dd>{{ planting.planting_date|date:"d M Y" }}</dd>
 
-            <dt>Inspection Date</dt>
-            <dd>{{ recommendation.assessment.inspection.inspection_date|date:"d M Y" }}</dd>
+            <dt>Assessment Date</dt>
+            <dd>{{ recommendation.source_date|date:"d M Y" }}</dd>
 
             <dt>Assessment Status</dt>
-            <dd>{{ recommendation.assessment.get_status_display }}</dd>
+            <dd>{{ recommendation.source_status }}</dd>
 
             <dt>Assessment Rule Version</dt>
-            <dd>{{ recommendation.assessment.rule_version }}</dd>
+            <dd>{{ recommendation.source_rule_version }}</dd>
         </dl>
 
-        <a href="{% url 'inspections:detail' recommendation.assessment.inspection.pk %}"
-           class="btn btn-secondary">
-            View Original Inspection
-        </a>
+        {% if inspection %}
+            <a href="{% url 'inspections:detail' inspection.pk %}"
+               class="btn btn-secondary">
+                View Related Inspection
+            </a>
+        {% endif %}
     </div>
 
     <div class="card">
@@ -136,15 +147,18 @@
             <dd>{{ recommendation.updated_at|date:"d M Y H:i" }}</dd>
         </dl>
 
-        <a href="{% url 'recommendations:update' recommendation.pk %}"
-           class="btn btn-primary">
-            Update Status or Follow-up
-        </a>
+        {% if recommendation.is_active %}
+            <a href="{% url 'recommendations:update' recommendation.pk %}"
+               class="btn btn-primary">
+                Update Status or Follow-up
+            </a>
+        {% endif %}
     </div>
 
     <div class="form-actions">
-        <a href="{% url 'recommendations:list' %}" class="btn btn-secondary">
-            Back to Recommendations
+        <a href="{% url 'recommendations:list' %}?view={% if recommendation.is_active %}current{% else %}history{% endif %}"
+           class="btn btn-secondary">
+            Back to {% if recommendation.is_active %}Current Guidance{% else %}History{% endif %}
         </a>
     </div>
     {% endwith %}

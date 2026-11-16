@@ -9,6 +9,7 @@ from crops.models import Crop, Variety
 from farms.models import Farm, Field
 from inspections.models import Inspection
 from planting.models import PlantingAttempt
+from recommendations.models import Recommendation
 
 from .models import RemainingSeasonAssessment
 from .remaining_season import assess_remaining_season
@@ -240,5 +241,29 @@ class RemainingSeasonAssessmentTests(TestCase):
         self.assertEqual(
             assessment.evidence["maturity_days_min"],
             120,
+        )
+        self.assertEqual(
+            assessment.evidence["crop_stage"],
+            inspection.crop_stage,
+        )
+        self.assertEqual(
+            assessment.evidence["planting_stations_observed"],
+            inspection.planting_stations_observed,
+        )
+        self.assertEqual(
+            assessment.evidence["stations_with_emergence"],
+            inspection.stations_with_emergence,
+        )
+        recommendation = Recommendation.objects.get(
+            remaining_season_assessment=assessment,
+            is_active=True,
+        )
+        self.assertEqual(
+            recommendation.evidence["crop_stage"],
+            inspection.crop_stage,
+        )
+        self.assertEqual(
+            recommendation.evidence["planting_stations_observed"],
+            inspection.planting_stations_observed,
         )
         self.assertEqual(assessment.rule_version, "1.0")

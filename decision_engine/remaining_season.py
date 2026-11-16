@@ -75,7 +75,23 @@ def assess_remaining_season(planting_attempt, assessment_date=None):
             latest_inspection.crop_stage
             if latest_inspection else None
         ),
+        "crop_stage": (
+            latest_inspection.crop_stage
+            if latest_inspection else None
+        ),
         "establishment_status": establishment_status,
+        "planting_stations_observed": (
+            latest_inspection.planting_stations_observed
+            if latest_inspection else None
+        ),
+        "stations_with_emergence": (
+            latest_inspection.stations_with_emergence
+            if latest_inspection else None
+        ),
+        "emergence_percentage": (
+            latest_inspection.emergence_percentage
+            if latest_inspection else None
+        ),
     }
 
     if latest_inspection:

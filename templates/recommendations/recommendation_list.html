@@ -10,10 +10,22 @@
         </div>
     </div>
 
+    <div class="form-actions" aria-label="Recommendation views">
+        <a href="{% url 'recommendations:list' %}?view=current"
+           class="btn {% if not is_history %}btn-primary{% else %}btn-secondary{% endif %}">
+            Current guidance ({{ current_count }})
+        </a>
+        <a href="{% url 'recommendations:list' %}?view=history"
+           class="btn {% if is_history %}btn-primary{% else %}btn-secondary{% endif %}">
+            History ({{ history_count }})
+        </a>
+    </div>
+
+    {% if not is_history %}
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Total Recommendations</div>
-            <div class="stat-value">{{ total_count }}</div>
+            <div class="stat-label">Current Recommendations</div>
+            <div class="stat-value">{{ current_count }}</div>
         </div>
 
         <div class="stat-card">
@@ -31,11 +43,15 @@
             <div class="stat-value">{{ completed_count }}</div>
         </div>
     </div>
+    {% endif %}
 
     <div class="card">
-        <h2>Find Recommendations</h2>
+        <h2>{% if is_history %}Search Recommendation History{% else %}Find Current Guidance{% endif %}</h2>
 
         <form method="get" class="recommendation-filter-form">
+            {% if is_history %}
+                <input type="hidden" name="view" value="history">
+            {% endif %}
 
             <div class="recommendation-filter-grid">
                 <div>
@@ -100,11 +116,11 @@
     </div>
 
     <div class="card">
-        <h2>Field Recommendations</h2>
+        <h2>{% if is_history %}Recommendation History{% else %}Current Field Guidance{% endif %}</h2>
 
         <div class="recommendation-list">
             {% for recommendation in recommendations %}
-                {% with planting=recommendation.assessment.inspection.planting_attempt %}
+                {% with planting=recommendation.planting_attempt inspection=recommendation.source_inspection %}
                 <article class="recommendation-item">
 
                     <div class="recommendation-item-header">
@@ -139,9 +155,9 @@
 
                     <div class="recommendation-item-footer">
                         <span>{{ recommendation.get_category_display }}</span>
-                        <span>
-                            Inspection: {{ recommendation.assessment.inspection.inspection_date|date:"d M Y" }}
-                        </span>
+                        {% if inspection %}
+                            <span>Inspection: {{ inspection.inspection_date|date:"d M Y" }}</span>
+                        {% endif %}
 
                         {% if recommendation.follow_up_date %}
                             <span>
@@ -159,19 +175,32 @@
                 {% endwith %}
             {% empty %}
                 <div class="empty-state">
-                    {% if total_count == 0 %}
-                        <h3>No recommendations yet</h3>
+                    {% if result_count == 0 and not is_history and current_count == 0 %}
+                        <h3>{% if history_count %}No current guidance{% else %}No recommendations yet{% endif %}</h3>
                         <p>
-                            Recommendations will appear here after field
-                            inspections have been recorded and assessed.
+                            {% if history_count %}
+                                There is no active guidance right now. Previous recommendations remain available in history.
+                            {% else %}
+                                Recommendations will appear here after field
+                                inspections have been recorded and assessed.
+                            {% endif %}
                         </p>
-                        <a href="{% url 'inspections:list' %}" class="btn btn-primary">
-                            View Inspections
-                        </a>
+                        {% if history_count %}
+                            <a href="{% url 'recommendations:list' %}?view=history" class="btn btn-secondary">
+                                View History
+                            </a>
+                        {% else %}
+                            <a href="{% url 'inspections:list' %}" class="btn btn-primary">
+                                View Inspections
+                            </a>
+                        {% endif %}
+                    {% elif result_count == 0 and is_history and history_count == 0 %}
+                        <h3>No recommendation history yet</h3>
+                        <p>Inactive guidance will be kept here when it no longer applies.</p>
                     {% else %}
                         <h3>No matching recommendations</h3>
                         <p>Try changing or clearing your filters.</p>
-                        <a href="{% url 'recommendations:list' %}" class="btn btn-secondary">
+                        <a href="{% url 'recommendations:list' %}?view={% if is_history %}history{% else %}current{% endif %}" class="btn btn-secondary">
                             Clear Filters
                         </a>
                     {% endif %}

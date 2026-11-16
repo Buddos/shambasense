@@ -10,6 +10,7 @@ from farms.models import Farm, Field
 from planting.models import PlantingAttempt
 from inspections.models import Inspection
 from recommendations.models import Recommendation
+from recommendations.services import generate_recommendations
 
 from .models import EstablishmentAssessment
 from .services import assess_establishment
@@ -288,6 +289,53 @@ class RecommendationIntegrationTests(TestCase):
         )
 
         self.assertTrue(recommendation.is_active)
+        self.assertEqual(
+            recommendation.evidence["crop_stage"],
+            inspection.crop_stage,
+        )
+        self.assertEqual(
+            recommendation.evidence["planting_stations_observed"],
+            inspection.planting_stations_observed,
+        )
+        self.assertEqual(
+            recommendation.evidence["stations_with_emergence"],
+            inspection.stations_with_emergence,
+        )
+
+    def test_unmapped_attention_finding_generates_guidance(self):
+        inspection = self.create_inspection()
+        assessment = assess_establishment(inspection)
+        assessment.status = EstablishmentAssessment.Status.ATTENTION_REQUIRED
+        assessment.findings = [{
+            "code": "new_attention_indicator",
+            "level": "attention",
+            "message": "A newly added warning requires review.",
+        }]
+        assessment.save()
+
+        generate_recommendations(assessment)
+
+        recommendation = Recommendation.objects.get(
+            assessment=assessment,
+            code="unmapped_attention_review",
+            is_active=True,
+        )
+        self.assertEqual(
+            recommendation.priority,
+            Recommendation.Priority.HIGH,
+        )
+        self.assertIn(
+            "new_attention_indicator",
+            recommendation.evidence["finding_codes"],
+        )
+        self.assertEqual(
+            recommendation.evidence["crop_stage"],
+            inspection.crop_stage,
+        )
+        self.assertEqual(
+            recommendation.evidence["planting_stations_observed"],
+            inspection.planting_stations_observed,
+        )
 
     def test_rerunning_assessment_does_not_duplicate_recommendations(self):
         inspection = self.create_inspection(
@@ -423,7 +471,7 @@ class RecommendationIntegrationTests(TestCase):
             Recommendation.Priority.HIGH,
         )
 
-    def test_old_recommendation_is_reactivated_if_finding_returns(self):
+    def test_completed_recommendation_returning_starts_new_episode(self):
         inspection = self.create_inspection(
             soil_moisture=Inspection.SoilMoisture.DRY,
         )
@@ -434,6 +482,12 @@ class RecommendationIntegrationTests(TestCase):
             assessment=assessment,
             code="soil_dry",
         )
+        follow_up_date = timezone.localdate() + timedelta(days=4)
+        dry_recommendation.status = Recommendation.Status.COMPLETED
+        dry_recommendation.completed_at = timezone.now()
+        dry_recommendation.follow_up_date = follow_up_date
+        dry_recommendation.save()
+        previous_completed_at = dry_recommendation.completed_at
 
         # Change dry soil to waterlogged.
         inspection.soil_moisture = Inspection.SoilMoisture.WATERLOGGED
@@ -443,6 +497,11 @@ class RecommendationIntegrationTests(TestCase):
 
         dry_recommendation.refresh_from_db()
         self.assertFalse(dry_recommendation.is_active)
+        self.assertEqual(
+            dry_recommendation.status,
+            Recommendation.Status.COMPLETED,
+        )
+        self.assertEqual(dry_recommendation.completed_at, previous_completed_at)
 
         # Change the observation back to dry.
         inspection.soil_moisture = Inspection.SoilMoisture.DRY
@@ -451,14 +510,24 @@ class RecommendationIntegrationTests(TestCase):
         assess_establishment(inspection)
 
         dry_recommendation.refresh_from_db()
+        self.assertFalse(dry_recommendation.is_active)
+        self.assertEqual(dry_recommendation.status, Recommendation.Status.COMPLETED)
+        self.assertEqual(dry_recommendation.follow_up_date, follow_up_date)
 
-        self.assertTrue(dry_recommendation.is_active)
+        new_episode = Recommendation.objects.get(
+            assessment=assessment,
+            code="soil_dry",
+            is_active=True,
+        )
+        self.assertEqual(new_episode.occurrence, 2)
+        self.assertEqual(new_episode.status, Recommendation.Status.PENDING)
+        self.assertIsNone(new_episode.completed_at)
+        self.assertIsNone(new_episode.follow_up_date)
 
-        # It must reuse the original record, not create a duplicate.
         self.assertEqual(
             Recommendation.objects.filter(
                 assessment=assessment,
                 code="soil_dry",
             ).count(),
-            1,
+            2,
         )

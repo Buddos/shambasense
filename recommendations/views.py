@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -16,7 +16,12 @@ def user_recommendations(user):
     return (
         Recommendation.objects
         .filter(
-            assessment__inspection__planting_attempt__field__farm__owner=user
+            Q(
+                assessment__inspection__planting_attempt__field__farm__owner=user
+            )
+            | Q(
+                remaining_season_assessment__planting_attempt__field__farm__owner=user
+            )
         )
         .select_related(
             "assessment",
@@ -26,15 +31,40 @@ def user_recommendations(user):
             "assessment__inspection__planting_attempt__variety",
             "assessment__inspection__planting_attempt__field",
             "assessment__inspection__planting_attempt__field__farm",
+            "remaining_season_assessment",
+            "remaining_season_assessment__latest_inspection",
+            "remaining_season_assessment__planting_attempt",
+            "remaining_season_assessment__planting_attempt__crop",
+            "remaining_season_assessment__planting_attempt__variety",
+            "remaining_season_assessment__planting_attempt__field",
+            "remaining_season_assessment__planting_attempt__field__farm",
         )
-        .order_by("-created_at")
+        .annotate(
+            priority_order=Case(
+                When(priority=Recommendation.Priority.HIGH, then=Value(0)),
+                When(priority=Recommendation.Priority.MEDIUM, then=Value(1)),
+                When(priority=Recommendation.Priority.LOW, then=Value(2)),
+                When(
+                    priority=Recommendation.Priority.INFORMATIONAL,
+                    then=Value(3),
+                ),
+                default=Value(4),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("priority_order", "-created_at")
     )
 
 
 @login_required
 def recommendation_list(request):
-    all_recommendations = user_recommendations(request.user)
-    recommendations = all_recommendations
+    active_recommendations = user_recommendations(request.user).filter(
+        is_active=True,
+    )
+    is_history = request.GET.get("view") == "history"
+    recommendations = user_recommendations(request.user).filter(
+        is_active=not is_history,
+    )
 
     # Validate filter values against the model's available choices.
     valid_statuses = dict(Recommendation.Status.choices)
@@ -70,18 +100,27 @@ def recommendation_list(request):
             | Q(assessment__inspection__planting_attempt__variety__name__icontains=search_query)
             | Q(assessment__inspection__planting_attempt__field__name__icontains=search_query)
             | Q(assessment__inspection__planting_attempt__field__farm__name__icontains=search_query)
+            | Q(remaining_season_assessment__planting_attempt__crop__name__icontains=search_query)
+            | Q(remaining_season_assessment__planting_attempt__variety__name__icontains=search_query)
+            | Q(remaining_season_assessment__planting_attempt__field__name__icontains=search_query)
+            | Q(remaining_season_assessment__planting_attempt__field__farm__name__icontains=search_query)
         )
 
     context = {
         "recommendations": recommendations,
-        "total_count": all_recommendations.count(),
-        "pending_count": all_recommendations.filter(
+        "is_history": is_history,
+        "result_count": recommendations.count(),
+        "current_count": active_recommendations.count(),
+        "history_count": user_recommendations(request.user).filter(
+            is_active=False,
+        ).count(),
+        "pending_count": active_recommendations.filter(
             status=Recommendation.Status.PENDING
         ).count(),
-        "in_progress_count": all_recommendations.filter(
+        "in_progress_count": active_recommendations.filter(
             status=Recommendation.Status.IN_PROGRESS
         ).count(),
-        "completed_count": all_recommendations.filter(
+        "completed_count": active_recommendations.filter(
             status=Recommendation.Status.COMPLETED
         ).count(),
         "selected_status": selected_status,
@@ -117,7 +156,7 @@ def recommendation_detail(request, pk):
 @login_required
 def recommendation_update(request, pk):
     recommendation = get_object_or_404(
-        user_recommendations(request.user),
+        user_recommendations(request.user).filter(is_active=True),
         pk=pk,
     )
 

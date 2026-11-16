@@ -6,7 +6,10 @@ from django.urls import reverse
 from django.utils import timezone
 
 from crops.models import Crop, Variety
-from decision_engine.models import EstablishmentAssessment
+from decision_engine.models import (
+    EstablishmentAssessment,
+    RemainingSeasonAssessment,
+)
 from farms.models import Farm, Field
 from inspections.models import Inspection
 from planting.models import PlantingAttempt
@@ -195,6 +198,84 @@ class RecommendationListTests(RecommendationTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.recommendation.title)
 
+    def test_inactive_recommendations_are_only_shown_in_history(self):
+        self.recommendation.is_active = False
+        self.recommendation.save()
+        self.client.force_login(self.user)
+
+        current_response = self.client.get(reverse("recommendations:list"))
+
+        self.assertEqual(current_response.status_code, 200)
+        self.assertNotContains(current_response, self.recommendation.title)
+        self.assertEqual(current_response.context["current_count"], 0)
+        self.assertEqual(current_response.context["pending_count"], 0)
+        self.assertEqual(current_response.context["history_count"], 1)
+
+        history_response = self.client.get(
+            reverse("recommendations:list"),
+            {"view": "history"},
+        )
+
+        self.assertEqual(history_response.status_code, 200)
+        self.assertContains(history_response, "Recommendation History")
+        self.assertContains(history_response, self.recommendation.title)
+
+    def test_current_recommendations_sort_by_priority_before_recency(self):
+        self.recommendation.priority = Recommendation.Priority.LOW
+        self.recommendation.save()
+        urgent = Recommendation.objects.create(
+            assessment=self.recommendation.assessment,
+            code="urgent_test_recommendation",
+            category=Recommendation.Category.CROP_HEALTH,
+            title="Urgent recommendation",
+            explanation="High priority guidance.",
+            recommended_action="Review the field.",
+            priority=Recommendation.Priority.HIGH,
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("recommendations:list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["recommendations"].first(),
+            urgent,
+        )
+
+    def test_remaining_season_guidance_is_in_current_list_and_detail(self):
+        planting = self.recommendation.planting_attempt
+        assessment = RemainingSeasonAssessment.objects.create(
+            planting_attempt=planting,
+            latest_inspection=self.recommendation.source_inspection,
+            status=RemainingSeasonAssessment.Status.WITHIN_MATURITY_WINDOW,
+            assessment_date=date.today(),
+            summary="The recorded dates fit the expected maturity window.",
+        )
+        season_recommendation = Recommendation.objects.create(
+            remaining_season_assessment=assessment,
+            code="season_routine_monitoring",
+            category=Recommendation.Category.SEASON,
+            title="Monitor the remaining season",
+            explanation=assessment.summary,
+            recommended_action="Continue field monitoring.",
+            priority=Recommendation.Priority.MEDIUM,
+            evidence={"crop_stage": "vegetative"},
+        )
+        self.client.force_login(self.user)
+
+        list_response = self.client.get(reverse("recommendations:list"))
+        detail_response = self.client.get(
+            reverse(
+                "recommendations:detail",
+                kwargs={"pk": season_recommendation.pk},
+            )
+        )
+
+        self.assertContains(list_response, season_recommendation.title)
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertContains(detail_response, "Within maturity window")
+        self.assertContains(detail_response, "vegetative")
+
 
 class RecommendationDetailTests(RecommendationTestMixin, TestCase):
 
@@ -363,3 +444,26 @@ class RecommendationUpdateTests(RecommendationTestMixin, TestCase):
             Recommendation.Status.PENDING,
         )
         self.assertIsNone(self.other_recommendation.completed_at)
+
+    def test_inactive_recommendation_cannot_be_updated(self):
+        self.recommendation.is_active = False
+        self.recommendation.save()
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "recommendations:update",
+                kwargs={"pk": self.recommendation.pk},
+            ),
+            {
+                "status": Recommendation.Status.COMPLETED,
+                "follow_up_date": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.recommendation.refresh_from_db()
+        self.assertEqual(
+            self.recommendation.status,
+            Recommendation.Status.PENDING,
+        )
