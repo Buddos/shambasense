@@ -1,0 +1,35 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Delete {{ farm.name }} | ShambaSense{% endblock %}
+
+{% block page_title %}Delete Farm{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <div class="form-card confirmation-card">
+        <span class="eyebrow">DELETE FARM</span>
+
+        <h1>Delete {{ farm.name }}?</h1>
+
+        <p>
+            This will permanently delete this farm and its registered fields.
+            This action cannot be undone.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-actions">
+                <a href="{% url 'farms:detail' farm.pk %}"
+                   class="secondary-button">
+                    Cancel
+                </a>
+
+                <button type="submit" class="danger-button">
+                    Delete farm
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

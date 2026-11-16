@@ -1,0 +1,100 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Planting Records</h1>
+            <p>Track crop establishment attempts across your fields.</p>
+        </div>
+
+        <a href="{% url 'planting:create' %}" class="btn btn-primary">
+            + Record Planting
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if plantings %}
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Variety</th>
+                        <th>Farm</th>
+                        <th>Field</th>
+                        <th>Planting Date</th>
+                        <th>Area</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for planting in plantings %}
+                        <tr>
+                            <td>{{ planting.crop.name }}</td>
+
+                            <td>
+                                {{ planting.variety.name }}
+                            </td>
+
+                            <td>
+                                {{ planting.field.farm.name }}
+                            </td>
+
+                            <td>
+                                {{ planting.field.name }}
+                            </td>
+
+                            <td>
+                                {{ planting.planting_date|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                {{ planting.area_planted }} acres
+                            </td>
+
+                            <td>
+                                {{ planting.get_status_display }}
+                            </td>
+
+                            <td>
+                                <a href="{% url 'planting:detail' planting.pk %}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+            <h3>No planting records yet</h3>
+
+            <p>
+                Record your first planting attempt to begin tracking
+                establishment and future crop decisions.
+            </p>
+
+            <a href="{% url 'planting:create' %}" class="btn btn-primary">
+                Record First Planting
+            </a>
+        </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

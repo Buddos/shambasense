@@ -1,0 +1,64 @@
+{% extends "public/base.html" %}
+
+{% block title %}Terms of Use | ShambaSense{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero-plain">
+    <div class="page-hero-inner">
+        <span class="eyebrow">USING THE PLATFORM</span>
+        <h1>Terms of Use</h1>
+        <p>Clear expectations for using ShambaSense and its agricultural decision-support features.</p>
+        <p class="policy-updated">Last updated: {% now "j F Y" %}</p>
+    </div>
+</section>
+
+<section class="section legal-layout">
+    <aside class="legal-aside">
+        <span class="eyebrow">PLEASE NOTE</span>
+        <p>ShambaSense helps organise observations and provide decision support. Farmers remain responsible for decisions made on their farms.</p>
+        <a href="{% url 'pages:contact' %}">Ask a question <span aria-hidden="true">&#8594;</span></a>
+    </aside>
+    <div class="legal-content">
+        <section>
+            <h2>1. Acceptance of terms</h2>
+            <p>By creating an account or using ShambaSense, you agree to these terms. If you do not agree, do not use the platform.</p>
+        </section>
+        <section>
+            <h2>2. Account registration</h2>
+            <p>You must provide the information required to create an account and keep account details reasonably current. You are responsible for activity carried out through your account.</p>
+        </section>
+        <section>
+            <h2>3. User responsibilities</h2>
+            <p>Use ShambaSense lawfully and provide information that is as accurate and complete as you can. Review records for errors before relying on them. You are responsible for deciding what farm and crop information to enter.</p>
+        </section>
+        <section>
+            <h2>4. Acceptable use</h2>
+            <p>Do not misuse, disrupt or attempt to compromise the platform, access accounts or information without permission, or use ShambaSense to submit unlawful or harmful content.</p>
+        </section>
+        <section>
+            <h2>5. Assessments and recommendations</h2>
+            <p>Assessments and recommendations are generated from information available in the platform, including records and observations entered by users. Incomplete, inaccurate or changing field conditions can affect the usefulness of results.</p>
+        </section>
+        <section class="terms-notice">
+            <h2>6. Agricultural decision-support notice</h2>
+            <p>ShambaSense provides decision-support information based on records and observations entered into the platform. Assessments and recommendations are not guarantees of crop performance, harvests or yields, and do not replace professional agronomic advice.</p>
+        </section>
+        <section>
+            <h2>7. Account security</h2>
+            <p>Keep your password and sign-in details confidential. Notify ShambaSense through the contact page if you believe your account has been accessed without permission.</p>
+        </section>
+        <section>
+            <h2>8. Service availability</h2>
+            <p>The platform may occasionally be unavailable or changed for maintenance, security or technical reasons. We do not guarantee uninterrupted access.</p>
+        </section>
+        <section>
+            <h2>9. Changes to these terms</h2>
+            <p>These terms may be updated as ShambaSense changes. Continued use of the platform after an update means you accept the revised terms.</p>
+        </section>
+        <section>
+            <h2>10. Contact</h2>
+            <p>Questions about these terms can be sent through the <a href="{% url 'pages:contact' %}">contact form</a>{% if contact_email %} or to <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>{% else %}. The ShambaSense contact email has not yet been configured{% endif %}.</p>
+        </section>
+    </div>
+</section>
+{% endblock %}

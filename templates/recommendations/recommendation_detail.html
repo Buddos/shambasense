@@ -1,0 +1,153 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container">
+
+    {% with planting=recommendation.assessment.inspection.planting_attempt %}
+    <div class="page-header">
+        <div>
+            <h1>Recommendation Details</h1>
+            <p>{{ recommendation.title }}</p>
+        </div>
+
+        <a href="{% url 'recommendations:update' recommendation.pk %}"
+           class="btn btn-primary">
+            Update Progress
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="recommendation-detail-heading">
+            <div>
+                <span class="recommendation-badge priority-{{ recommendation.priority }}">
+                    {{ recommendation.get_priority_display }} priority
+                </span>
+
+                <span class="recommendation-badge status-{{ recommendation.status }}">
+                    {{ recommendation.get_status_display }}
+                </span>
+            </div>
+
+            <p class="recommendation-category">
+                {{ recommendation.get_category_display }}
+            </p>
+        </div>
+
+        <h2>{{ recommendation.title }}</h2>
+
+        <h3>Why this recommendation was generated</h3>
+        <p>{{ recommendation.explanation|linebreaksbr }}</p>
+
+        <div class="recommendation-action">
+            <h3>Recommended action</h3>
+            <p>{{ recommendation.recommended_action|linebreaksbr }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Related Field and Inspection</h2>
+
+        <dl class="detail-list">
+            <dt>Farm</dt>
+            <dd>{{ planting.field.farm.name }}</dd>
+
+            <dt>Field</dt>
+            <dd>{{ planting.field.name }}</dd>
+
+            <dt>Crop</dt>
+            <dd>{{ planting.crop.name }}</dd>
+
+            <dt>Variety</dt>
+            <dd>{{ planting.variety.name }}</dd>
+
+            <dt>Planting Date</dt>
+            <dd>{{ planting.planting_date|date:"d M Y" }}</dd>
+
+            <dt>Inspection Date</dt>
+            <dd>{{ recommendation.assessment.inspection.inspection_date|date:"d M Y" }}</dd>
+
+            <dt>Assessment Status</dt>
+            <dd>{{ recommendation.assessment.get_status_display }}</dd>
+
+            <dt>Assessment Rule Version</dt>
+            <dd>{{ recommendation.assessment.rule_version }}</dd>
+        </dl>
+
+        <a href="{% url 'inspections:detail' recommendation.assessment.inspection.pk %}"
+           class="btn btn-secondary">
+            View Original Inspection
+        </a>
+    </div>
+
+    <div class="card">
+        <h2>Supporting Evidence</h2>
+
+        {% if recommendation.evidence %}
+            <dl class="detail-list">
+                {% for key, value in recommendation.evidence.items %}
+                    <dt>{{ key|cut:"_"|title }}</dt>
+                    <dd>
+                        {% if value == True %}
+                            Yes
+                        {% elif value == False %}
+                            No
+                        {% elif value == None or value == "" %}
+                            Not recorded
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </dd>
+                {% endfor %}
+            </dl>
+        {% else %}
+            <p>No supporting evidence was stored for this recommendation.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Progress Tracking</h2>
+
+        <dl class="detail-list">
+            <dt>Status</dt>
+            <dd>{{ recommendation.get_status_display }}</dd>
+
+            <dt>Follow-up Date</dt>
+            <dd>
+                {% if recommendation.follow_up_date %}
+                    {{ recommendation.follow_up_date|date:"d M Y" }}
+                {% else %}
+                    Not scheduled
+                {% endif %}
+            </dd>
+
+            <dt>Completed At</dt>
+            <dd>
+                {% if recommendation.completed_at %}
+                    {{ recommendation.completed_at|date:"d M Y H:i" }}
+                {% else %}
+                    Not completed
+                {% endif %}
+            </dd>
+
+            <dt>Created</dt>
+            <dd>{{ recommendation.created_at|date:"d M Y H:i" }}</dd>
+
+            <dt>Last Updated</dt>
+            <dd>{{ recommendation.updated_at|date:"d M Y H:i" }}</dd>
+        </dl>
+
+        <a href="{% url 'recommendations:update' recommendation.pk %}"
+           class="btn btn-primary">
+            Update Status or Follow-up
+        </a>
+    </div>
+
+    <div class="form-actions">
+        <a href="{% url 'recommendations:list' %}" class="btn btn-secondary">
+            Back to Recommendations
+        </a>
+    </div>
+    {% endwith %}
+
+</div>
+{% endblock %}

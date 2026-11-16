@@ -1,0 +1,40 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Recommendation Report | ShambaSense{% endblock %}
+{% block page_title %}Recommendation Report{% endblock %}
+{% block extra_css %}{% include "reports/_styles.html" %}{% endblock %}
+
+{% block content %}
+{% with planting=recommendation.assessment.inspection.planting_attempt %}
+<div class="report-header">
+    <div>
+        <h1>{{ recommendation.title }}</h1>
+        <p class="report-muted">{{ planting.crop.name }} · {{ planting.field.farm.name }} · {{ recommendation.created_at|date:"d M Y" }}</p>
+    </div>
+    <div class="report-actions">
+        <a class="btn btn-secondary" href="{% url 'reports:inspection_detail' recommendation.assessment.inspection.pk %}">Inspection report</a>
+        <a class="btn btn-primary" href="{% url 'reports:recommendation_pdf' recommendation.pk %}">Download PDF</a>
+    </div>
+</div>
+
+<section class="report-card">
+    <h2>Recommendation details</h2>
+    <dl class="report-detail">
+        <div><dt>Farm</dt><dd>{{ planting.field.farm.name }}</dd></div>
+        <div><dt>Field</dt><dd>{{ planting.field.name }}</dd></div>
+        <div><dt>Crop</dt><dd>{{ planting.crop.name }}</dd></div>
+        <div><dt>Variety</dt><dd>{{ planting.variety.name }}</dd></div>
+        <div><dt>Category</dt><dd>{{ recommendation.get_category_display }}</dd></div>
+        <div><dt>Priority</dt><dd>{{ recommendation.get_priority_display }}</dd></div>
+        <div><dt>Status</dt><dd>{{ recommendation.get_status_display }}</dd></div>
+        <div><dt>Active</dt><dd>{% if recommendation.is_active %}Yes{% else %}No{% endif %}</dd></div>
+        <div><dt>Follow-up date</dt><dd>{{ recommendation.follow_up_date|default:"Not set" }}</dd></div>
+        <div><dt>Rule version</dt><dd>{{ recommendation.rule_version }}</dd></div>
+    </dl>
+    <h3>Explanation</h3>
+    <p>{{ recommendation.explanation|default:"No explanation recorded."|linebreaksbr }}</p>
+    <h3>Recommended action</h3>
+    <p>{{ recommendation.recommended_action|default:"No action recorded."|linebreaksbr }}</p>
+</section>
+{% endwith %}
+{% endblock %}

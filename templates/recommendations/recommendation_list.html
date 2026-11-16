@@ -1,0 +1,184 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>Recommendations</h1>
+            <p>Review field-based guidance and track the actions you take.</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Recommendations</div>
+            <div class="stat-value">{{ total_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value">{{ pending_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">In Progress</div>
+            <div class="stat-value">{{ in_progress_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value">{{ completed_count }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Find Recommendations</h2>
+
+        <form method="get" class="recommendation-filter-form">
+
+            <div class="recommendation-filter-grid">
+                <div>
+                    <label for="search">Search</label>
+                    <input
+                        type="search"
+                        name="q"
+                        id="search"
+                        class="form-control"
+                        value="{{ search_query }}"
+                        placeholder="Search crop, field or recommendation"
+                    >
+                </div>
+
+                <div>
+                    <label for="status">Status</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All statuses</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}"
+                                {% if selected_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="priority">Priority</label>
+                    <select name="priority" id="priority" class="form-control">
+                        <option value="">All priorities</option>
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}"
+                                {% if selected_priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="category">Category</label>
+                    <select name="category" id="category" class="form-control">
+                        <option value="">All categories</option>
+                        {% for value, label in category_choices %}
+                            <option value="{{ value }}"
+                                {% if selected_category == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="recommendation-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'recommendations:list' %}" class="btn btn-secondary">
+                    Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Field Recommendations</h2>
+
+        <div class="recommendation-list">
+            {% for recommendation in recommendations %}
+                {% with planting=recommendation.assessment.inspection.planting_attempt %}
+                <article class="recommendation-item">
+
+                    <div class="recommendation-item-header">
+                        <div>
+                            <h3>
+                                <a href="{% url 'recommendations:detail' recommendation.pk %}">
+                                    {{ recommendation.title }}
+                                </a>
+                            </h3>
+
+                            <p class="recommendation-context">
+                                {{ planting.crop.name }} — {{ planting.variety.name }}
+                                <span>·</span>
+                                {{ planting.field.farm.name }} / {{ planting.field.name }}
+                            </p>
+                        </div>
+
+                        <div class="recommendation-badges">
+                            <span class="recommendation-badge priority-{{ recommendation.priority }}">
+                                {{ recommendation.get_priority_display }}
+                            </span>
+
+                            <span class="recommendation-badge status-{{ recommendation.status }}">
+                                {{ recommendation.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <p class="recommendation-explanation">
+                        {{ recommendation.explanation|truncatewords:35 }}
+                    </p>
+
+                    <div class="recommendation-item-footer">
+                        <span>{{ recommendation.get_category_display }}</span>
+                        <span>
+                            Inspection: {{ recommendation.assessment.inspection.inspection_date|date:"d M Y" }}
+                        </span>
+
+                        {% if recommendation.follow_up_date %}
+                            <span>
+                                Follow-up: {{ recommendation.follow_up_date|date:"d M Y" }}
+                            </span>
+                        {% endif %}
+
+                        <a href="{% url 'recommendations:detail' recommendation.pk %}"
+                           class="btn btn-secondary">
+                            View Details
+                        </a>
+                    </div>
+
+                </article>
+                {% endwith %}
+            {% empty %}
+                <div class="empty-state">
+                    {% if total_count == 0 %}
+                        <h3>No recommendations yet</h3>
+                        <p>
+                            Recommendations will appear here after field
+                            inspections have been recorded and assessed.
+                        </p>
+                        <a href="{% url 'inspections:list' %}" class="btn btn-primary">
+                            View Inspections
+                        </a>
+                    {% else %}
+                        <h3>No matching recommendations</h3>
+                        <p>Try changing or clearing your filters.</p>
+                        <a href="{% url 'recommendations:list' %}" class="btn btn-secondary">
+                            Clear Filters
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "public/base.html" %}
+{% load static %}
+
+{% block title %}About ShambaSense{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero-about">
+    <div class="page-hero-inner">
+        <span class="eyebrow eyebrow-light">OUR PURPOSE</span>
+        <h1>About ShambaSense</h1>
+        <p>ShambaSense is an agricultural decision-support platform designed to help farmers manage crop establishment and make informed farming decisions.</p>
+    </div>
+</section>
+
+<section class="section about-intro">
+    <div class="about-photo-wrap">
+        <img src="{% static 'images/land.png' %}?v=2" alt="A Kenyan farmer checks her crops on a tablet in a maize field at sunrise" loading="lazy">
+        <span>Grounded in the records and observations from your own farm.</span>
+    </div>
+    <div class="about-copy">
+        <span class="eyebrow">WHY SHAMBASENSE</span>
+        <h2>Good decisions begin with a clearer record of what is happening in the field.</h2>
+        <p>Farm work involves many decisions across a growing season. Keeping planting details and crop observations together can make it easier to understand what has happened and what may need attention.</p>
+    </div>
+</section>
+
+<section class="about-sections" aria-label="About our work">
+    <div class="section about-section-grid">
+        <article>
+            <span class="eyebrow">01 / THE CHALLENGE</span>
+            <h2>The Challenge</h2>
+            <p>Farmers often make important crop-management decisions without organised records of planting activities, crop conditions and field observations.</p>
+        </article>
+        <article>
+            <span class="eyebrow">02 / OUR SOLUTION</span>
+            <h2>Our Solution</h2>
+            <p>ShambaSense provides a simple platform where farmers can manage farm records, monitor crop establishment, record field inspections and receive recommendations based on available information.</p>
+        </article>
+        <article>
+            <span class="eyebrow">03 / OUR MISSION</span>
+            <h2>Our Mission</h2>
+            <p>To make practical agricultural decision-support tools more accessible to farmers and support better-informed farm management.</p>
+        </article>
+        <article>
+            <span class="eyebrow">04 / OUR VISION</span>
+            <h2>Our Vision</h2>
+            <p>A future where farmers can use organised farm information to make more confident and informed decisions.</p>
+        </article>
+    </div>
+</section>
+
+<section class="about-cta">
+    <div class="section about-cta-inner">
+        <h2>Make your field observations easier to use.</h2>
+        <a class="button button-primary" href="{% url 'accounts:register' %}">Get Started <span aria-hidden="true">&#8594;</span></a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,104 @@
+
+<aside class="sidebar">
+
+    <!-- BRAND -->
+    <div class="sidebar-brand">
+        <a href="{% url 'dashboard:home' %}" class="brand">
+            ShambaSense
+        </a>
+
+        <div class="brand-subtitle">
+            Agricultural Decision Support
+        </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="nav-section">
+
+        <div class="nav-section-title">
+            Overview
+        </div>
+
+        <a href="{% url 'dashboard:home' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
+
+            <span class="nav-icon">▦</span>
+            <span>Dashboard</span>
+
+        </a>
+
+    </div>
+
+    <!-- FARM MANAGEMENT -->
+    <div class="nav-section">
+
+        <div class="nav-section-title">
+            Farm Management
+        </div>
+
+        <a href="{% url 'farms:list' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'farms' %}active{% endif %}">
+
+            <span class="nav-icon">⌂</span>
+            <span>Farms & Fields</span>
+
+        </a>
+
+        <a href="{% url 'crops:list' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'crops' %}active{% endif %}">
+
+            <span class="nav-icon">♧</span>
+            <span>Crops & Varieties</span>
+
+        </a>
+
+        <a href="{% url 'planting:list' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'planting' %}active{% endif %}">
+
+            <span class="nav-icon">✳</span>
+            <span>Planting</span>
+
+        </a>
+
+    </div>
+
+    <!-- CROP ASSESSMENT -->
+    <div class="nav-section">
+
+        <div class="nav-section-title">
+            Crop Assessment
+        </div>
+
+        <a href="{% url 'inspections:list' %}"
+         class="nav-link {% if request.resolver_match.app_name == 'inspections' %}active{% endif %}">
+         <span class="nav-icon">◉</span>
+         <span>Inspections</span>
+        </a>
+
+        <a href="{% url 'recommendations:list' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'recommendations' %}active{% endif %}">
+            <span class="nav-icon">✓</span>
+            <span>Recommendations</span>
+        </a>
+
+        <a href="{% url 'decision_engine:history' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'decision_engine' %}active{% endif %}">
+            <span class="nav-icon">⌁</span>
+            <span>Assessments</span>
+        </a>
+
+        <a href="{% url 'reports:dashboard' %}"
+           class="nav-link {% if request.resolver_match.app_name == 'reports' %}active{% endif %}">
+            <span class="nav-icon">▤</span>
+            <span>Reports</span>
+        </a>
+
+    </div>
+
+    <!-- SIDEBAR FOOTER -->
+    <div class="sidebar-footer">
+        <span>ShambaSense</span>
+        <small>Farm intelligence workspace</small>
+    </div>
+
+</aside>

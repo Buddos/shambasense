@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ShambaSense helps farmers organise farm records, monitor crops and make better-informed decisions.">
+    <meta name="theme-color" content="#153d2b">
+    <title>{% block title %}ShambaSense | Better farming decisions{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/public.css' %}?v=2">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <a class="public-brand" href="{% url 'pages:home' %}" aria-label="ShambaSense home">
+                <span class="brand-mark" aria-hidden="true">S</span>
+                <span>ShambaSense</span>
+            </a>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" aria-label="Open navigation menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="public-nav" id="public-navigation" aria-label="Main navigation">
+                <a href="{% url 'pages:home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>Home</a>
+                <a href="{% url 'pages:about' %}" {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}>About</a>
+                <a href="{% url 'pages:privacy' %}" {% if request.resolver_match.url_name == 'privacy' %}aria-current="page"{% endif %}>Privacy Policy</a>
+                <a href="{% url 'pages:terms' %}" {% if request.resolver_match.url_name == 'terms' %}aria-current="page"{% endif %}>Terms</a>
+                <a href="{% url 'pages:contact' %}" {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content">
+        {% if messages %}
+            <div class="public-messages" aria-live="polite" aria-atomic="true">
+                {% for message in messages %}
+                    <div class="public-message public-message-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="public-footer">
+        <div class="footer-main">
+            <div class="footer-brand-block">
+                <a class="public-brand footer-brand" href="{% url 'pages:home' %}">
+                    <span class="brand-mark" aria-hidden="true">S</span>
+                    <span>ShambaSense</span>
+                </a>
+                <p>Organised field information for better-informed farming decisions.</p>
+            </div>
+            <div class="footer-links">
+                <div>
+                    <h2>Explore</h2>
+                    <a href="{% url 'pages:about' %}">About</a>
+                    <a href="{% url 'pages:contact' %}">Contact</a>
+                </div>
+                <div>
+                    <h2>Information</h2>
+                    <a href="{% url 'pages:privacy' %}">Privacy Policy</a>
+                    <a href="{% url 'pages:terms' %}">Terms of Use</a>
+                </div>
+                <div>
+                    <h2>Farmer workspace</h2>
+                    <a href="{% url 'accounts:login' %}">Sign in</a>
+                    <a href="{% url 'accounts:register' %}">Create an account</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>ShambaSense &copy; {% now "Y" %}</span>
+            <span>Built for thoughtful farm management.</span>
+        </div>
+    </footer>
+    <script src="{% static 'js/public.js' %}?v=1" defer></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

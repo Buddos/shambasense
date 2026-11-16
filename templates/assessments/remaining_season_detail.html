@@ -1,0 +1,173 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Remaining-Season Assessment | ShambaSense{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Remaining-Season Assessment</h1>
+            <p>
+                {{ planting.crop.name }} — {{ planting.variety.name }}
+                · {{ planting.field.farm.name }} / {{ planting.field.name }}
+            </p>
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-secondary"
+               href="{% url 'planting:detail' planting.pk %}">
+                View Planting
+            </a>
+            <a class="btn btn-secondary"
+               href="{% url 'decision_engine:history' %}">
+                Assessment History
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Assessment Result</h2>
+        <p><strong>Status:</strong> {{ assessment.get_status_display }}</p>
+        <p>{{ assessment.summary }}</p>
+        <p>
+            <small>
+                Assessed {{ assessment.assessed_at|date:"d M Y, H:i" }}
+                · Rule version {{ assessment.rule_version }}
+            </small>
+        </p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Days After Planting</span>
+            <h2>
+                {% if assessment.days_after_planting != None %}
+                    {{ assessment.days_after_planting }}
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Expected Maturity Start</span>
+            <h2>
+                {% if assessment.expected_maturity_start %}
+                    {{ assessment.expected_maturity_start|date:"d M Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Expected Maturity End</span>
+            <h2>
+                {% if assessment.expected_maturity_end %}
+                    {{ assessment.expected_maturity_end|date:"d M Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Expected Season End</span>
+            <h2>
+                {% if assessment.expected_season_end_date %}
+                    {{ assessment.expected_season_end_date|date:"d M Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Assessment Evidence</h2>
+        <dl class="detail-list">
+            <dt>Crop</dt>
+            <dd>{{ assessment.evidence.crop|default:planting.crop.name }}</dd>
+
+            <dt>Variety</dt>
+            <dd>{{ assessment.evidence.variety|default:planting.variety.name }}</dd>
+
+            <dt>Planting date</dt>
+            <dd>{{ planting.planting_date|date:"d M Y" }}</dd>
+
+            <dt>Recorded maturity range</dt>
+            <dd>
+                {{ assessment.evidence.maturity_days_min|default:"Not recorded" }}
+                to
+                {{ assessment.evidence.maturity_days_max|default:"Not recorded" }}
+                days
+            </dd>
+
+            <dt>Latest inspection date</dt>
+            <dd>
+                {% if assessment.latest_inspection %}
+                    {{ assessment.latest_inspection.inspection_date|date:"d M Y" }}
+                {% else %}
+                    No inspection recorded
+                {% endif %}
+            </dd>
+
+            <dt>Latest crop stage</dt>
+            <dd>
+                {% if assessment.latest_inspection %}
+                    {{ assessment.latest_inspection.get_crop_stage_display }}
+                {% else %}
+                    Not available
+                {% endif %}
+            </dd>
+
+            <dt>Establishment status</dt>
+            <dd>
+                {{ assessment.evidence.establishment_status|default:"Not assessed" }}
+            </dd>
+
+            <dt>Crop condition</dt>
+            <dd>{{ assessment.evidence.crop_condition|default:"Not recorded" }}</dd>
+
+            <dt>Soil moisture</dt>
+            <dd>{{ assessment.evidence.soil_moisture|default:"Not recorded" }}</dd>
+
+            <dt>Weed pressure</dt>
+            <dd>{{ assessment.evidence.weed_pressure|default:"Not recorded" }}</dd>
+
+            <dt>Pest or disease signs</dt>
+            <dd>
+                {% if assessment.evidence.pest_or_disease_signs == True %}
+                    Reported
+                {% elif assessment.evidence.pest_or_disease_signs == False %}
+                    Not reported
+                {% else %}
+                    Not recorded
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+
+    {% if assessment.latest_inspection %}
+        <div class="card">
+            <h2>Latest Inspection</h2>
+            <a class="btn btn-secondary"
+               href="{% url 'inspections:detail' assessment.latest_inspection.pk %}">
+                View Inspection
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Reassess Remaining Season</h2>
+        <p>
+            Run the assessment again using the latest planting and inspection
+            records. This updates the current assessment; it does not create
+            a separate historical snapshot.
+        </p>
+        <form method="post"
+              action="{% url 'planting:assess_remaining_season' planting.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                Reassess Remaining Season
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

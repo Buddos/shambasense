@@ -1,0 +1,91 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Sign In | ShambaSense{% endblock %}
+
+{% block content %}
+<section class="login-layout">
+    <div class="login-intro">
+        <span class="eyebrow">YOUR FARMING JOURNEY</span>
+        <h1>Welcome back.</h1>
+        <p>
+            Sign in to access your ShambaSense account and continue managing
+            your farm information.
+        </p>
+    </div>
+
+    <div class="auth-card login-card">
+        <div class="card-heading">
+            <span class="eyebrow">ACCOUNT ACCESS</span>
+            <h2>Sign in to ShambaSense</h2>
+            <p>Enter your username and password.</p>
+        </div>
+
+        {% if form.errors %}
+            <div class="form-errors" role="alert">
+                Your username or password was incorrect. Please try again.
+            </div>
+        {% endif %}
+
+        {% if next %}
+            {% if user.is_authenticated %}
+                <div class="form-errors">
+                    Your account does not have permission to access that page.
+                </div>
+            {% else %}
+                <div class="info-message">
+                    Please sign in to continue.
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="{{ form.username.id_for_label }}"
+                    class="form-control"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                    required
+                    autofocus
+                    value="{{ form.username.value|default_if_none:'' }}"
+                >
+                {% for error in form.username.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="{{ form.password.id_for_label }}"
+                    class="form-control"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+                {% for error in form.password.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <button type="submit" class="primary-button">
+                Sign in
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Don't have an account?
+            <a href="{% url 'accounts:register' %}">Register as a farmer</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

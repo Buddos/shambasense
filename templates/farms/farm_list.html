@@ -1,0 +1,68 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}My Farms | ShambaSense{% endblock %}
+
+{% block page_title %}My Farms{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">MY FARMING OPERATIONS</span>
+            <h1>My Farms</h1>
+            <p>Manage your farms and fields from one place.</p>
+        </div>
+
+        <a href="{% url 'farms:create' %}" class="primary-button button-link">
+            + Add farm
+        </a>
+    </div>
+
+    {% if farms %}
+        <div class="farm-grid">
+            {% for farm in farms %}
+                <article class="farm-card">
+                    <div class="farm-card-top">
+                        <span class="farm-icon">🌱</span>
+                        <span class="farm-count">
+                            {{ farm.field_count }} field{{ farm.field_count|pluralize }}
+                        </span>
+                    </div>
+
+                    <h2>{{ farm.name }}</h2>
+
+                    <p class="farm-location">
+                        {{ farm.county }}
+                        {% if farm.sub_county %}
+                            · {{ farm.sub_county }}
+                        {% endif %}
+                    </p>
+
+                    <div class="farm-size">
+                        <span>Total acreage</span>
+                        <strong>{{ farm.total_acreage }} acres</strong>
+                    </div>
+
+                    <a href="{% url 'farms:detail' farm.pk %}" class="card-link">
+                        View farm →
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🌾</div>
+            <h2>No farms registered yet</h2>
+            <p>
+                Add your first farm to begin recording fields and agricultural
+                activities in ShambaSense.
+            </p>
+            <a href="{% url 'farms:create' %}" class="primary-button button-link">
+                Add my first farm
+            </a>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>Update Recommendation</h1>
+            <p>{{ recommendation.title }}</p>
+        </div>
+    </div>
+
+    <div class="card recommendation-update-card">
+
+        <p>
+            Update the progress of this recommendation and optionally
+            schedule a date to revisit the field.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="message error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Recommendation Status</label>
+                {{ form.status }}
+
+                {% for error in form.status.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.follow_up_date.id_for_label }}">Follow-up Date</label>
+                {{ form.follow_up_date }}
+
+                {% for error in form.follow_up_date.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+
+                <small class="form-help">
+                    Leave blank if no follow-up date has been scheduled.
+                </small>
+            </div>
+
+            <div class="recommendation-readonly-note">
+                The recommendation title, explanation, recommended action,
+                and supporting evidence are generated from the assessment
+                and cannot be edited here.
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Save Progress
+                </button>
+
+                <a href="{% url 'recommendations:detail' recommendation.pk %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}{{ farm.name }} | ShambaSense{% endblock %}
+
+{% block page_title %}{{ farm.name }}{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">FARM DETAILS</span>
+            <h1>{{ farm.name }}</h1>
+            <p>
+                {{ farm.county }}
+                {% if farm.sub_county %} · {{ farm.sub_county }}{% endif %}
+                {% if farm.ward %} · {{ farm.ward }}{% endif %}
+            </p>
+        </div>
+
+        <div class="heading-actions">
+            <a href="{% url 'farms:update' farm.pk %}" class="secondary-button">
+                Edit farm
+            </a>
+
+            <a href="{% url 'farms:delete' farm.pk %}" class="danger-button">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span>Farm size</span>
+            <strong>{{ farm.total_acreage }} acres</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Fields</span>
+            <strong>{{ farm.fields.count }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>County</span>
+            <strong>{{ farm.county }}</strong>
+        </div>
+    </div>
+
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">FIELD MANAGEMENT</span>
+            <h2>Fields on this farm</h2>
+        </div>
+
+        <a href="{% url 'farms:field_create' farm.pk %}"
+           class="primary-button button-link">
+            + Add field
+        </a>
+    </div>
+
+    {% if farm.fields.all %}
+        <div class="field-list">
+            {% for field in farm.fields.all %}
+                <article class="field-card">
+                    <div>
+                        <h3>{{ field.name }}</h3>
+
+                        <p>
+                            {{ field.acreage }} acres
+                            {% if field.soil_type %}
+                                · {{ field.soil_type }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="field-actions">
+                        <a href="{% url 'farms:field_update' field.pk %}">
+                            Edit
+                        </a>
+
+                        <a href="{% url 'farms:field_delete' field.pk %}">
+                            Delete
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state compact">
+            <h3>No fields registered</h3>
+            <p>Add the first field belonging to this farm.</p>
+
+            <a href="{% url 'farms:field_create' farm.pk %}"
+               class="primary-button button-link">
+                Add field
+            </a>
+        </div>
+    {% endif %}
+
+    {% if farm.notes %}
+        <div class="notes-card">
+            <h3>Farm notes</h3>
+            <p>{{ farm.notes }}</p>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}

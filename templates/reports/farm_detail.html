@@ -1,0 +1,61 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Farm Report | ShambaSense{% endblock %}
+{% block page_title %}Farm Report{% endblock %}
+{% block extra_css %}{% include "reports/_styles.html" %}{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <div>
+        <h1>{{ farm.name }}</h1>
+        <p class="report-muted">Farm report · {{ farm.county|default:"County not recorded" }}</p>
+    </div>
+    <div class="report-actions">
+        <a class="btn btn-secondary" href="{% url 'reports:dashboard' %}">Back to reports</a>
+        <a class="btn btn-primary" href="{% url 'reports:farm_pdf' farm.pk %}">Download PDF</a>
+    </div>
+</div>
+
+<section class="report-card">
+    <h2>Farm information</h2>
+    <dl class="report-detail">
+        <div><dt>Farm name</dt><dd>{{ farm.name }}</dd></div>
+        <div><dt>County</dt><dd>{{ farm.county|default:"Not recorded" }}</dd></div>
+        <div><dt>Sub-county</dt><dd>{{ farm.sub_county|default:"Not recorded" }}</dd></div>
+        <div><dt>Ward</dt><dd>{{ farm.ward|default:"Not recorded" }}</dd></div>
+        <div><dt>Village</dt><dd>{{ farm.village|default:"Not recorded" }}</dd></div>
+        <div><dt>Total acreage</dt><dd>{{ farm.total_acreage }}</dd></div>
+        <div><dt>Location description</dt><dd>{{ farm.location_description|default:"Not recorded" }}</dd></div>
+        <div><dt>Notes</dt><dd>{{ farm.notes|default:"None" }}</dd></div>
+    </dl>
+</section>
+
+<section class="report-card">
+    <h2>Fields and planting activity</h2>
+    {% if fields %}
+        {% for field in fields %}
+            <div style="padding:12px 0;border-bottom:1px solid #e3eae5">
+                <strong>{{ field.name }}</strong>
+                <p class="report-muted">{{ field.acreage }} acres · Soil: {{ field.soil_type|default:"Not recorded" }}</p>
+                {% if field.planting_attempts.all %}
+                    <ul>
+                    {% for planting in field.planting_attempts.all %}
+                        <li>
+                            {{ planting.crop.name }} — {{ planting.variety.name }}
+                            ({{ planting.planting_date }})
+                            · <a class="report-link" href="{% url 'reports:planting_detail' planting.pk %}">Planting report</a>
+                        </li>
+                    {% empty %}
+                        <li class="report-muted">No planting records for this field.</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="report-muted">No planting records for this field.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="report-empty">No fields have been added to this farm.</div>
+    {% endif %}
+</section>
+{% endblock %}

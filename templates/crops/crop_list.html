@@ -1,0 +1,70 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Crop Catalogue | ShambaSense{% endblock %}
+
+{% block page_title %}Crop Catalogue{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">AGRICULTURAL KNOWLEDGE</span>
+            <h1>Crop Catalogue</h1>
+            <p>
+                Browse crops and their available varieties used by ShambaSense.
+            </p>
+        </div>
+    </div>
+
+    {% if crops %}
+        <div class="farm-grid">
+            {% for crop in crops %}
+                <article class="farm-card">
+
+                    <div class="farm-card-top">
+                        <span class="farm-icon">🌱</span>
+
+                        <span class="farm-count">
+                            {{ crop.varieties.count }}
+                            variet{{ crop.varieties.count|pluralize:"y,ies" }}
+                        </span>
+                    </div>
+
+                    <h2>{{ crop.name }}</h2>
+
+                    {% if crop.scientific_name %}
+                        <p class="farm-location">
+                            <em>{{ crop.scientific_name }}</em>
+                        </p>
+                    {% endif %}
+
+                    <div class="farm-size">
+                        <span>Crop type</span>
+                        <strong>{{ crop.get_crop_type_display }}</strong>
+                    </div>
+
+                    <a href="{% url 'crops:detail' crop.pk %}"
+                       class="card-link">
+                        View crop →
+                    </a>
+
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🌾</div>
+
+            <h2>No crops available</h2>
+
+            <p>
+                The ShambaSense crop catalogue has not been populated yet.
+                An administrator can add crops through the administration
+                interface.
+            </p>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}

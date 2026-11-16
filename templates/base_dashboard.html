@@ -1,0 +1,750 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}ShambaSense | Agricultural Decision Support{% endblock %}
+    </title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=2">
+
+    <style>
+
+        :root {
+            --sidebar-width: 260px;
+
+            --green-950: #102e21;
+            --green-900: #123b2a;
+            --green-800: #185239;
+            --green-700: #216b47;
+            --green-100: #eaf4ed;
+            --green-50: #f5faf6;
+
+            --text: #24332a;
+            --muted: #718078;
+            --border: #e3eae5;
+            --white: #ffffff;
+
+            --shadow: 0 12px 32px rgba(18, 59, 42, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: block;
+            margin: 0;
+            min-height: 100vh;
+            background: #f3f6f2;
+            color: var(--text);
+            font-family: "DM Sans", "Avenir Next", sans-serif;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            width: var(--sidebar-width);
+
+            display: flex;
+            flex-direction: column;
+
+            padding: 25px 16px 18px;
+
+            background: linear-gradient(165deg, #123b2a 0%, #102e21 68%, #182f25 100%);
+            color: var(--white);
+
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            padding: 0 12px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .sidebar .brand {
+            display: inline-block;
+            color: var(--white);
+            font-size: 25px;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.8px;
+        }
+
+        .brand-subtitle {
+            margin-top: 7px;
+            color: #a8c3b2;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-section {
+            margin-top: 27px;
+        }
+
+        .nav-section-title {
+            padding: 0 12px;
+            margin-bottom: 11px;
+
+            color: #8eaa99;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            width: 100%;
+            min-height: 43px;
+
+            padding: 11px 12px;
+            margin-bottom: 5px;
+
+            border-radius: 7px;
+
+            color: #d4e3d9;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--white);
+        }
+
+        .nav-link.active {
+            background: var(--green-700);
+            color: var(--white);
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 19px;
+            min-width: 19px;
+
+            font-size: 17px;
+        }
+
+        .nav-link-disabled {
+            color: #80988a;
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .nav-link-disabled:hover {
+            background: transparent;
+            color: #80988a;
+        }
+
+        .coming-soon {
+            margin-left: auto;
+            font-size: 9px;
+            color: #a8c3b2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* SIDEBAR LOGOUT */
+
+        .sidebar-logout-form {
+            margin: 0;
+        }
+
+        .sidebar-logout-button {
+            border: 0;
+            background: transparent;
+            text-align: left;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .sidebar-logout-button:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 24px 12px 5px;
+
+            border-top: 1px solid rgba(255,255,255,0.10);
+
+            color: #a8c3b2;
+            font-size: 11px;
+        }
+
+        .sidebar-footer span {
+            display: block;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-footer small {
+            font-size: 10px;
+        }
+
+        /* =========================
+           MAIN LAYOUT
+        ========================= */
+
+        .main-wrapper {
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================
+           TOPBAR
+        ========================= */
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+
+            min-height: 74px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 34px;
+
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 3px 14px rgba(18, 59, 42, 0.025);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .topbar-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--green-900);
+        }
+
+        .topbar-subtitle {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================
+           USER MENU
+        ========================= */
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 7px 10px;
+
+            border-radius: 8px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .user-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .user-menu summary:hover {
+            background: var(--green-50);
+        }
+
+        .user-avatar {
+            width: 37px;
+            height: 37px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: var(--green-100);
+            color: var(--green-800);
+
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+
+            width: 210px;
+            padding: 8px;
+
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            box-shadow: var(--shadow);
+            z-index: 20;
+        }
+
+        .user-dropdown a,
+        .user-dropdown button {
+            display: block;
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border: 0;
+            border-radius: 6px;
+
+            background: transparent;
+            color: var(--text);
+
+            font-size: 12px;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .user-dropdown a:hover,
+        .user-dropdown button:hover {
+            background: var(--green-50);
+            color: var(--green-800);
+        }
+
+        .user-dropdown form {
+            margin: 0;
+        }
+
+        /* =========================
+           CONTENT AREA
+        ========================= */
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 32px 34px 50px;
+            flex: 1;
+            animation: content-enter 0.35s ease-out both;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: var(--green-900);
+            font-size: 27px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .page-header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @keyframes content-enter {
+            from { opacity: 0; transform: translateY(7px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================
+           DJANGO MESSAGES
+        ========================= */
+
+        .messages {
+            margin: 0 0 22px;
+            padding: 0;
+        }
+
+        .message {
+            padding: 13px 16px;
+            margin-bottom: 10px;
+
+            border-radius: 8px;
+            border: 1px solid var(--border);
+
+            font-size: 13px;
+        }
+
+        .message.success {
+            background: #edf8ef;
+            border-color: #c9e8d0;
+            color: #216b37;
+        }
+
+        .message.error {
+            background: #fff0f0;
+            border-color: #f0caca;
+            color: #a52c2c;
+        }
+
+        .message.warning {
+            background: #fff8e8;
+            border-color: #f1dfb4;
+            color: #856404;
+        }
+
+        .message.info {
+            background: #edf5ff;
+            border-color: #cbdff8;
+            color: #245b91;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .main-footer {
+            padding: 18px 35px;
+
+            border-top: 1px solid var(--border);
+            background: var(--white);
+
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        .mobile-menu-button {
+            display: none;
+
+            border: 0;
+            background: transparent;
+
+            color: var(--green-900);
+            font-size: 23px;
+
+            cursor: pointer;
+        }
+
+        .sidebar-overlay {
+            display: none;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.visible {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 950;
+                background: rgba(0,0,0,0.4);
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .content-wrapper {
+                padding: 25px 20px 40px;
+            }
+
+            .main-footer {
+                padding: 18px 20px;
+            }
+
+        }
+
+        @media (max-width: 550px) {
+
+            .topbar {
+                min-height: 65px;
+                padding: 0 14px;
+            }
+
+            .topbar-title {
+                font-size: 14px;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .content-wrapper {
+                padding: 22px 14px 35px;
+            }
+
+            .page-header h1 {
+                font-size: 21px;
+            }
+
+        }
+
+    </style>
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    {% include "includes/sidebar.html" %}
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false">
+
+                    ☰
+
+                </button>
+
+                <div>
+                    <div class="topbar-title">
+                        {% block page_title %}Dashboard{% endblock %}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Agricultural Decision Support Workspace
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- USER PROFILE -->
+            <div class="topbar-right">
+
+                <details class="user-menu">
+
+                    <summary>
+
+                        <div class="user-avatar">
+                            {{ request.user.first_name|default:request.user.username|first|upper }}
+                        </div>
+
+                        <div class="user-info">
+
+                            <span class="user-name">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </span>
+
+                            <span class="user-role">
+                                {{ request.user.get_role_display }}
+                            </span>
+
+                        </div>
+
+                        <span class="user-menu-chevron" aria-hidden="true">⌄</span>
+
+                    </summary>
+
+                    <div class="user-dropdown">
+
+                        <a href="{% url 'accounts:profile' %}">
+                            Profile
+                        </a>
+
+                        <a href="{% url 'accounts:settings' %}">
+                            Settings
+                        </a>
+
+                        <form method="post" action="{% url 'accounts:logout' %}">
+
+                            {% csrf_token %}
+
+                            <button type="submit">
+                                Sign out
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </details>
+
+            </div>
+
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <main class="content-wrapper">
+
+            <!-- DJANGO NOTIFICATIONS -->
+            {% if messages %}
+
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+            {% block content %}
+
+            {% endblock %}
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="main-footer">
+
+            ShambaSense &copy; {% now "Y" %}.
+            Agricultural Decision Support Platform.
+
+        </footer>
+
+    </div>
+
+    <!-- MOBILE SIDEBAR SCRIPT -->
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const sidebar = document.querySelector(".sidebar");
+            const menuButton = document.getElementById("mobileMenuButton");
+            const overlay = document.getElementById("sidebarOverlay");
+
+            if (!sidebar || !menuButton || !overlay) {
+                return;
+            }
+
+            function openSidebar() {
+                sidebar.classList.add("open");
+                overlay.classList.add("visible");
+                menuButton.setAttribute("aria-expanded", "true");
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove("open");
+                overlay.classList.remove("visible");
+                menuButton.setAttribute("aria-expanded", "false");
+            }
+
+            menuButton.addEventListener("click", function () {
+
+                if (sidebar.classList.contains("open")) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+
+            });
+
+            overlay.addEventListener("click", closeSidebar);
+
+            document.addEventListener("keydown", function (event) {
+
+                if (event.key === "Escape") {
+                    closeSidebar();
+                }
+
+            });
+
+        });
+
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

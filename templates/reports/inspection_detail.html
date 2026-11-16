@@ -1,0 +1,71 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Inspection Report | ShambaSense{% endblock %}
+{% block page_title %}Inspection Report{% endblock %}
+{% block extra_css %}{% include "reports/_styles.html" %}{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <div>
+        <h1>Field inspection</h1>
+        <p class="report-muted">{{ inspection.planting_attempt.crop.name }} · {{ inspection.inspection_date }}</p>
+    </div>
+    <div class="report-actions">
+        <a class="btn btn-secondary" href="{% url 'reports:planting_detail' inspection.planting_attempt.pk %}">Planting report</a>
+        <a class="btn btn-primary" href="{% url 'reports:inspection_pdf' inspection.pk %}">Download PDF</a>
+    </div>
+</div>
+
+<section class="report-card">
+    <h2>Inspection details</h2>
+    <dl class="report-detail">
+        <div><dt>Farm</dt><dd>{{ inspection.planting_attempt.field.farm.name }}</dd></div>
+        <div><dt>Field</dt><dd>{{ inspection.planting_attempt.field.name }}</dd></div>
+        <div><dt>Crop / variety</dt><dd>{{ inspection.planting_attempt.crop.name }} / {{ inspection.planting_attempt.variety.name }}</dd></div>
+        <div><dt>Inspection date</dt><dd>{{ inspection.inspection_date }}</dd></div>
+        <div><dt>Inspected by</dt><dd>{{ inspection.inspected_by|default:"Not recorded" }}</dd></div>
+        <div><dt>Crop stage</dt><dd>{{ inspection.get_crop_stage_display }}</dd></div>
+        <div><dt>Crop condition</dt><dd>{{ inspection.get_crop_condition_display }}</dd></div>
+        <div><dt>Soil moisture</dt><dd>{{ inspection.get_soil_moisture_display }}</dd></div>
+        <div><dt>Weed pressure</dt><dd>{{ inspection.get_weed_pressure_display }}</dd></div>
+        <div><dt>Stations observed</dt><dd>{{ inspection.planting_stations_observed|default:"Not recorded" }}</dd></div>
+        <div><dt>Stations with emergence</dt><dd>{{ inspection.stations_with_emergence|default:"Not recorded" }}</dd></div>
+        <div><dt>Emergence percentage</dt><dd>{{ inspection.emergence_percentage|default:"Not recorded" }}{% if inspection.emergence_percentage != None %}%{% endif %}</dd></div>
+        <div><dt>Healthy plants</dt><dd>{{ inspection.healthy_plant_count }}</dd></div>
+        <div><dt>Damaged plants</dt><dd>{{ inspection.damaged_plant_count }}</dd></div>
+        <div><dt>Pest or disease signs</dt><dd>{% if inspection.pest_or_disease_signs %}Observed{% else %}Not observed{% endif %}</dd></div>
+        <div><dt>Follow-up date</dt><dd>{{ inspection.follow_up_date|default:"Not set" }}</dd></div>
+    </dl>
+    <h3>Observations</h3>
+    <p>{{ inspection.observations|default:"No observations recorded."|linebreaksbr }}</p>
+    <h3>Actions taken</h3>
+    <p>{{ inspection.actions_taken|default:"No actions recorded."|linebreaksbr }}</p>
+</section>
+
+<section class="report-card">
+    <h2>Establishment assessment</h2>
+    {% if assessment %}
+        <span class="report-pill">{{ assessment.get_status_display }}</span>
+        <p>{{ assessment.summary }}</p>
+        <p class="report-muted">Rule version: {{ assessment.rule_version }} · Assessed: {{ assessment.assessed_at }}</p>
+    {% else %}
+        <div class="report-empty">No establishment assessment is linked to this inspection.</div>
+    {% endif %}
+</section>
+
+<section class="report-card">
+    <h2>Recommendations</h2>
+    {% if recommendations %}
+        {% for recommendation in recommendations %}
+            <div style="padding:12px 0;border-bottom:1px solid #e3eae5">
+                <strong>{{ recommendation.title }}</strong>
+                <p class="report-muted">{{ recommendation.get_priority_display }} · {{ recommendation.get_status_display }}</p>
+                <p>{{ recommendation.recommended_action }}</p>
+                <a class="report-link" href="{% url 'reports:recommendation_detail' recommendation.pk %}">View recommendation report</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="report-empty">No recommendations are linked to this inspection.</div>
+    {% endif %}
+</section>
+{% endblock %}

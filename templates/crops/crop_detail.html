@@ -1,0 +1,100 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}{{ crop.name }} | ShambaSense{% endblock %}
+
+{% block page_title %}{{ crop.name }}{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CROP INFORMATION</span>
+
+            <h1>{{ crop.name }}</h1>
+
+            {% if crop.scientific_name %}
+                <p>
+                    <em>{{ crop.scientific_name }}</em>
+                </p>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'crops:list' %}" class="secondary-button">
+            Back to crops
+        </a>
+    </div>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <span>Crop type</span>
+            <strong>{{ crop.get_crop_type_display }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Available varieties</span>
+            <strong>{{ crop.varieties.count }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Status</span>
+            <strong>Active</strong>
+        </div>
+
+    </div>
+
+    {% if crop.description %}
+        <div class="notes-card">
+            <h3>About this crop</h3>
+            <p>{{ crop.description }}</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">VARIETIES</span>
+            <h2>Available varieties</h2>
+        </div>
+    </div>
+
+    {% if crop.varieties.all %}
+        <div class="field-list">
+
+            {% for variety in crop.varieties.all %}
+                <article class="field-card">
+
+                    <div>
+                        <h3>{{ variety.name }}</h3>
+
+                        <p>
+                            Expected maturity:
+                            {{ variety.maturity_days_min }}
+                            –
+                            {{ variety.maturity_days_max }}
+                            days
+                        </p>
+                    </div>
+
+                    <div class="field-actions">
+                        <a href="{% url 'crops:variety_detail' variety.pk %}">
+                            View
+                        </a>
+                    </div>
+
+                </article>
+            {% endfor %}
+
+        </div>
+    {% else %}
+        <div class="empty-state compact">
+            <h3>No varieties registered</h3>
+
+            <p>
+                No active varieties have been configured for this crop yet.
+            </p>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}

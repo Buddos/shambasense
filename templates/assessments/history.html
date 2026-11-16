@@ -1,0 +1,146 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Assessment History | ShambaSense{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Assessment History</h1>
+            <p>Review crop establishment and remaining-season assessments for your plantings.</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Establishment Assessments</span>
+            <h2>{{ establishment_count }}</h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Remaining-Season Assessments</span>
+            <h2>{{ season_count }}</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="page-header">
+            <div>
+                <h2>Crop Establishment</h2>
+                <p>Assessment results generated from field inspections.</p>
+            </div>
+        </div>
+
+        {% if establishment_assessments %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Crop / Variety</th>
+                            <th>Farm / Field</th>
+                            <th>Inspection Date</th>
+                            <th>Status</th>
+                            <th>Emergence</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in establishment_assessments %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.inspection.planting_attempt.crop.name }}</strong><br>
+                                <small>{{ item.inspection.planting_attempt.variety.name }}</small>
+                            </td>
+                            <td>
+                                {{ item.inspection.planting_attempt.field.farm.name }}<br>
+                                <small>{{ item.inspection.planting_attempt.field.name }}</small>
+                            </td>
+                            <td>{{ item.inspection.inspection_date|date:"d M Y" }}</td>
+                            <td>{{ item.get_status_display }}</td>
+                            <td>
+                                {% if item.emergence_percentage != None %}
+                                    {{ item.emergence_percentage }}%
+                                {% else %}
+                                    Not recorded
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{% url 'decision_engine:establishment_detail' item.inspection_id %}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No establishment assessments have been generated yet.</p>
+            <a class="btn btn-primary" href="{% url 'inspections:create' %}">
+                Record an Inspection
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="page-header">
+            <div>
+                <h2>Remaining-Season Assessments</h2>
+                <p>Recorded maturity windows compared with expected season-end dates.</p>
+            </div>
+        </div>
+
+        {% if season_assessments %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Crop / Variety</th>
+                            <th>Farm / Field</th>
+                            <th>Assessment Date</th>
+                            <th>Status</th>
+                            <th>Maturity Window</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in season_assessments %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.planting_attempt.crop.name }}</strong><br>
+                                <small>{{ item.planting_attempt.variety.name }}</small>
+                            </td>
+                            <td>
+                                {{ item.planting_attempt.field.farm.name }}<br>
+                                <small>{{ item.planting_attempt.field.name }}</small>
+                            </td>
+                            <td>{{ item.assessment_date|date:"d M Y" }}</td>
+                            <td>{{ item.get_status_display }}</td>
+                            <td>
+                                {% if item.expected_maturity_start and item.expected_maturity_end %}
+                                    {{ item.expected_maturity_start|date:"d M Y" }}
+                                    – {{ item.expected_maturity_end|date:"d M Y" }}
+                                {% else %}
+                                    Not available
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-primary"
+                                   href="{% url 'decision_engine:remaining_season_detail' item.planting_attempt_id %}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No remaining-season assessments have been generated yet.</p>
+            <a class="btn btn-primary" href="{% url 'planting:list' %}">
+                View Plantings
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

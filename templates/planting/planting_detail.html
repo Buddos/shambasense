@@ -1,0 +1,290 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}
+    {{ planting.crop.name }} | ShambaSense
+{% endblock %}
+
+{% block page_title %}
+    Planting Record
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>{{ planting.crop.name }}</h1>
+            <p>
+                {{ planting.variety.name }}
+                ·
+                {{ planting.field.farm.name }}
+                ·
+                {{ planting.field.name }}
+            </p>
+        </div>
+
+        <div>
+            <a href="{% url 'planting:update' planting.pk %}"
+               class="btn btn-primary">
+                Edit
+            </a>
+
+            <a href="{% url 'planting:delete' planting.pk %}"
+               class="btn btn-danger">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Planting Details</h2>
+
+        <dl>
+            <dt>Farm</dt>
+            <dd>{{ planting.field.farm.name }}</dd>
+
+            <dt>Field</dt>
+            <dd>{{ planting.field.name }}</dd>
+
+            <dt>Field Size</dt>
+            <dd>{{ planting.field.acreage }} acres</dd>
+
+            <dt>Crop</dt>
+            <dd>{{ planting.crop.name }}</dd>
+
+            <dt>Variety</dt>
+            <dd>{{ planting.variety.name }}</dd>
+
+            <dt>Planting Date</dt>
+            <dd>{{ planting.planting_date|date:"d M Y" }}</dd>
+
+            <dt>Expected Season End</dt>
+            <dd>
+                {% if planting.expected_season_end_date %}
+                    {{ planting.expected_season_end_date|date:"d M Y" }}
+                {% else %}
+                    Not recorded
+                {% endif %}
+            </dd>
+
+            <dt>Area Planted</dt>
+            <dd>{{ planting.area_planted }} acres</dd>
+
+            <dt>Planting Method</dt>
+            <dd>{{ planting.get_planting_method_display }}</dd>
+
+            <dt>Seed Source</dt>
+            <dd>{{ planting.seed_source|default:"Not recorded" }}</dd>
+
+            <dt>Target Population</dt>
+            <dd>
+                {% if planting.target_plant_population_per_acre %}
+                    {{ planting.target_plant_population_per_acre }}
+                    plants/acre
+                {% else %}
+                    Not recorded
+                {% endif %}
+            </dd>
+
+            <dt>Status</dt>
+            <dd>{{ planting.get_status_display }}</dd>
+
+            <dt>Notes</dt>
+            <dd>{{ planting.notes|default:"No notes recorded." }}</dd>
+        </dl>
+    </div>
+
+    <section class="card season-assessment-card">
+        <div class="season-assessment-header">
+            <div>
+                <h2>Remaining-Season Assessment</h2>
+                <p>
+                    Compare the variety's expected maturity period
+                    with the recorded growing-season end date.
+                </p>
+            </div>
+
+            <form method="post"
+                  action="{% url 'planting:assess_remaining_season' planting.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    {% if remaining_season_assessment %}
+                        Refresh Assessment
+                    {% else %}
+                        Run Assessment
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+
+        {% if remaining_season_assessment %}
+            <div class="assessment-result">
+                <p class="assessment-status">
+                    <strong>Status:</strong>
+                    {{ remaining_season_assessment.get_status_display }}
+                </p>
+
+                <p>
+                    {{ remaining_season_assessment.summary }}
+                </p>
+
+                <dl>
+                    <dt>Expected Maturity Starts</dt>
+                    <dd>
+                        {% if remaining_season_assessment.expected_maturity_start %}
+                            {{ remaining_season_assessment.expected_maturity_start|date:"d M Y" }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </dd>
+
+                    <dt>Expected Maturity Ends</dt>
+                    <dd>
+                        {% if remaining_season_assessment.expected_maturity_end %}
+                            {{ remaining_season_assessment.expected_maturity_end|date:"d M Y" }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </dd>
+
+                    <dt>Recorded Season End</dt>
+                    <dd>
+                        {% if remaining_season_assessment.expected_season_end_date %}
+                            {{ remaining_season_assessment.expected_season_end_date|date:"d M Y" }}
+                        {% else %}
+                            Not recorded
+                        {% endif %}
+                    </dd>
+
+                    <dt>Days After Planting</dt>
+                    <dd>
+                        {% if remaining_season_assessment.days_after_planting != None %}
+                            {{ remaining_season_assessment.days_after_planting }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </dd>
+
+                    <dt>Latest Inspection</dt>
+                    <dd>
+                        {% if remaining_season_assessment.latest_inspection %}
+                            {{ remaining_season_assessment.latest_inspection.inspection_date|date:"d M Y" }}
+                            —
+                            {{ remaining_season_assessment.latest_inspection.get_crop_stage_display }}
+                        {% else %}
+                            No inspection recorded
+                        {% endif %}
+                    </dd>
+
+                    <dt>Last Assessed</dt>
+                    <dd>
+                        {{ remaining_season_assessment.assessed_at|date:"d M Y, H:i" }}
+                    </dd>
+                </dl>
+            </div>
+
+            <p class="assessment-disclaimer">
+                This assessment uses recorded planting, variety and
+                inspection information. It does not predict weather,
+                guarantee crop maturity or guarantee a harvest.
+                Review the findings with a qualified local agronomist
+                when making important crop-management decisions.
+            </p>
+        {% else %}
+            <p>
+                No remaining-season assessment has been generated
+                for this planting record yet.
+            </p>
+            <p>
+                Run the assessment to check the recorded maturity
+                window against the expected season-end date.
+            </p>
+        {% endif %}
+    </section>
+
+    <p>
+        <a href="{% url 'planting:list' %}">
+            ← Back to Planting Records
+        </a>
+    </p>
+
+</div>
+
+<style>
+    .season-assessment-card {
+        margin-top: 24px;
+    }
+
+    .season-assessment-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .season-assessment-header h2 {
+        margin-top: 0;
+        color: var(--green-900);
+    }
+
+    .season-assessment-header p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .assessment-result {
+        padding: 18px;
+        background: var(--green-50);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .assessment-status {
+        color: var(--green-900);
+        font-size: 16px;
+    }
+
+    .assessment-result > p {
+        line-height: 1.7;
+    }
+
+    .assessment-result dl {
+        display: grid;
+        grid-template-columns: minmax(150px, 220px) 1fr;
+        gap: 12px 20px;
+        margin-top: 22px;
+    }
+
+    .assessment-result dt {
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    .assessment-result dd {
+        margin: 0;
+    }
+
+    .assessment-disclaimer {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 600px) {
+        .assessment-result dl {
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+
+        .assessment-result dd {
+            margin-bottom: 12px;
+        }
+    }
+</style>
+
+{% endblock %}

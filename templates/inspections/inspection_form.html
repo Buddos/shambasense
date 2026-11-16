@@ -1,0 +1,151 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>{{ title }}</h1>
+            <p>
+                Record observations about crop establishment,
+                soil conditions and general crop health.
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-section">
+                <h3>Inspection Information</h3>
+
+                {% for field in form %}
+                    {% if field.name == "planting_attempt" or field.name == "inspection_date" or field.name == "crop_stage" %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small class="form-text">{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3>Crop Establishment</h3>
+                <p>Record the planting stations and plants examined.</p>
+
+                {% for field in form %}
+                    {% if field.name == "planting_stations_observed" or field.name == "stations_with_emergence" or field.name == "healthy_plant_count" or field.name == "damaged_plant_count" %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small class="form-text">{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3>Field Conditions</h3>
+
+                {% for field in form %}
+                    {% if field.name == "crop_condition" or field.name == "soil_moisture" or field.name == "weed_pressure" or field.name == "pest_or_disease_signs" %}
+                        <div class="form-group">
+                            {% if field.name == "pest_or_disease_signs" %}
+                                <label>
+                                    {{ field }}
+                                    {{ field.label }}
+                                </label>
+                            {% else %}
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <small class="form-text">{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-section">
+                <h3>Observations and Follow-up</h3>
+
+                {% for field in form %}
+                    {% if field.name == "observations" or field.name == "actions_taken" or field.name == "follow_up_date" %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <small class="form-text">{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {{ submit_text }}
+                </button>
+
+                {% if inspection %}
+                    <a href="{% url 'inspections:detail' inspection.pk %}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+                {% else %}
+                    <a href="{% url 'inspections:list' %}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+                {% endif %}
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

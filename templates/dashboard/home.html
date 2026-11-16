@@ -1,0 +1,669 @@
+{% extends "base_dashboard.html" %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .dashboard-stat {
+        min-width: 0;
+        padding: 22px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+
+    .dashboard-stat-label {
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .7px;
+    }
+
+    .dashboard-stat-value {
+        color: var(--green-900);
+        font-size: 31px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .dashboard-stat-note {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .dashboard-columns {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+        gap: 22px;
+        margin-bottom: 22px;
+    }
+
+    .dashboard-card {
+        padding: 24px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+
+    .dashboard-card h2 {
+        margin: 0;
+        color: var(--green-900);
+        font-size: 17px;
+    }
+
+    .dashboard-card-subtitle {
+        margin: 6px 0 20px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .decision-box {
+        padding: 17px;
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: #fbfcfb;
+    }
+
+    .decision-box:last-child {
+        margin-bottom: 0;
+    }
+
+    .decision-label {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .7px;
+    }
+
+    .decision-value {
+        margin-top: 6px;
+        color: var(--green-900);
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .decision-summary {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        margin-top: 9px;
+        padding: 5px 9px;
+        border-radius: 20px;
+        background: var(--green-50);
+        color: var(--green-800);
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .status-attention_required,
+    .status-season_constraint,
+    .status-maturity_window_elapsed {
+        background: #fff0ee;
+        color: #a33326;
+    }
+
+    .status-mixed_signals,
+    .status-timing_uncertain {
+        background: #fff7e8;
+        color: #856404;
+    }
+
+    .status-insufficient_data,
+    .status-limited_data {
+        background: #f3f5f4;
+        color: #59665e;
+    }
+
+    .status-maturity_reached,
+    .status-within_maturity_window,
+    .status-no_major_warning_signs {
+        background: #eaf6ed;
+        color: #216b47;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .activity-item {
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .activity-item:first-child {
+        padding-top: 0;
+    }
+
+    .activity-title {
+        color: var(--green-900);
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .activity-meta {
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .empty-state {
+        padding: 18px 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .dashboard-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 20px;
+    }
+
+    .recommendation-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .recommendation-row:last-child {
+        border-bottom: 0;
+    }
+
+    .recommendation-title {
+        color: var(--green-900);
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .recommendation-context {
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .priority-badge {
+        flex-shrink: 0;
+        padding: 5px 8px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .priority-high {
+        background: #fff0ee;
+        color: #a33326;
+    }
+
+    .priority-medium {
+        background: #fff7e8;
+        color: #856404;
+    }
+
+    .priority-low,
+    .priority-informational {
+        background: #edf5ff;
+        color: #245b91;
+    }
+
+    @media (max-width: 1100px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-columns {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .dashboard-stat {
+            padding: 19px;
+        }
+
+        .dashboard-card {
+            padding: 20px;
+        }
+
+        .recommendation-row {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Farm Overview</h1>
+
+    <p>
+        Welcome back, {{ request.user.first_name|default:request.user.username }}.
+        Here is the current state of your farm activities and field decisions.
+    </p>
+</div>
+
+
+<!-- =========================
+     KEY STATISTICS
+========================= -->
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-label">Farms</div>
+        <div class="dashboard-stat-value">{{ farms_count }}</div>
+        <div class="dashboard-stat-note">Registered farms</div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-label">Fields</div>
+        <div class="dashboard-stat-value">{{ fields_count }}</div>
+        <div class="dashboard-stat-note">Managed fields</div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-label">Plantings</div>
+        <div class="dashboard-stat-value">{{ planting_count }}</div>
+        <div class="dashboard-stat-note">
+            {{ active_planting_count }} currently active
+        </div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-label">Inspections</div>
+        <div class="dashboard-stat-value">{{ inspections_count }}</div>
+        <div class="dashboard-stat-note">
+            {{ outstanding_recommendations_count }} recommendations outstanding
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     DECISION OVERVIEW
+========================= -->
+
+<div class="dashboard-columns">
+
+    <section class="dashboard-card">
+
+        <h2>Latest Crop Assessment</h2>
+
+        <p class="dashboard-card-subtitle">
+            The latest inspection and establishment assessment available
+            for your planting activities.
+        </p>
+
+        {% if latest_inspection %}
+
+            <div class="decision-box">
+
+                <div class="decision-label">
+                    Crop / Variety
+                </div>
+
+                <div class="decision-value">
+                    {{ latest_inspection.planting_attempt.crop.name }}
+                    —
+                    {{ latest_inspection.planting_attempt.variety.name }}
+                </div>
+
+                <div class="decision-summary">
+                    Field:
+                    {{ latest_inspection.planting_attempt.field.name }}
+                    —
+                    {{ latest_inspection.planting_attempt.field.farm.name }}
+                </div>
+
+                <div class="decision-summary">
+                    Inspected {{ latest_inspection.inspection_date }}
+                    at
+                    {{ latest_inspection.get_crop_stage_display }}
+                    stage.
+                </div>
+
+            </div>
+
+            {% if latest_establishment_assessment %}
+
+                <div class="decision-box">
+
+                    <div class="decision-label">
+                        Establishment decision
+                    </div>
+
+                    <div class="decision-value">
+                        {{ latest_establishment_assessment.get_status_display }}
+                    </div>
+
+                    <span class="status-badge status-{{ latest_establishment_assessment.status }}">
+                        {{ latest_establishment_assessment.get_status_display }}
+                    </span>
+
+                    <p class="decision-summary">
+                        {{ latest_establishment_assessment.summary }}
+                    </p>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+                    The latest inspection has not yet been assessed.
+                </div>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="empty-state">
+                No field inspections have been recorded yet.
+                Add an inspection after observing your crop in the field.
+            </div>
+
+        {% endif %}
+
+        <div class="dashboard-actions">
+
+            <a href="{% url 'inspections:list' %}" class="btn btn-primary">
+                View inspections
+            </a>
+
+            <a href="{% url 'planting:list' %}" class="btn btn-secondary">
+                View plantings
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="dashboard-card">
+
+        <h2>Remaining Season</h2>
+
+        <p class="dashboard-card-subtitle">
+            Latest maturity-window assessment based on recorded planting
+            information and the expected season end.
+        </p>
+
+        {% if latest_remaining_season_assessment %}
+
+            <div class="decision-box">
+
+                <div class="decision-label">
+                    Crop / Variety
+                </div>
+
+                <div class="decision-value">
+                    {{ latest_remaining_season_assessment.planting_attempt.crop.name }}
+                    —
+                    {{ latest_remaining_season_assessment.planting_attempt.variety.name }}
+                </div>
+
+                <span class="status-badge status-{{ latest_remaining_season_assessment.status }}">
+                    {{ latest_remaining_season_assessment.get_status_display }}
+                </span>
+
+                <p class="decision-summary">
+                    {{ latest_remaining_season_assessment.summary }}
+                </p>
+
+                {% if latest_remaining_season_assessment.expected_maturity_start %}
+                    <p class="decision-summary">
+                        Expected maturity window:
+                        {{ latest_remaining_season_assessment.expected_maturity_start }}
+                        to
+                        {{ latest_remaining_season_assessment.expected_maturity_end }}
+                    </p>
+                {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                No remaining-season assessment is available yet.
+                Once planting and season information are recorded,
+                ShambaSense can assess the maturity window.
+            </div>
+
+        {% endif %}
+
+        <div class="dashboard-actions">
+
+            <a href="{% url 'planting:list' %}" class="btn btn-secondary">
+                Review planting records
+            </a>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =========================
+     OUTSTANDING RECOMMENDATIONS
+========================= -->
+
+<section class="dashboard-card">
+
+    <h2>Outstanding Recommendations</h2>
+
+    <p class="dashboard-card-subtitle">
+        Active guidance that still requires farmer attention or follow-up.
+    </p>
+
+    {% if recent_recommendations %}
+
+        {% for recommendation in recent_recommendations %}
+
+            <div class="recommendation-row">
+
+                <div>
+
+                    <div class="recommendation-title">
+                        {{ recommendation.title }}
+                    </div>
+
+                    <div class="recommendation-context">
+                        {{ recommendation.assessment.inspection.planting_attempt.crop.name }}
+                        —
+                        {{ recommendation.assessment.inspection.planting_attempt.field.name }}
+                        ·
+                        {{ recommendation.assessment.inspection.inspection_date }}
+                    </div>
+
+                </div>
+
+                <span class="priority-badge priority-{{ recommendation.priority }}">
+                    {{ recommendation.get_priority_display }}
+                </span>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty-state">
+            No active recommendations require attention right now.
+        </div>
+
+    {% endif %}
+
+    <div class="dashboard-actions">
+
+        <a href="{% url 'recommendations:list' %}" class="btn btn-primary">
+            View recommendations
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     RECENT ACTIVITY
+========================= -->
+
+<div class="dashboard-columns">
+
+    <section class="dashboard-card">
+
+        <h2>Recent Planting Activity</h2>
+
+        <p class="dashboard-card-subtitle">
+            Your five most recent planting attempts.
+        </p>
+
+        {% if recent_plantings %}
+
+            <div class="activity-list">
+
+                {% for planting in recent_plantings %}
+
+                    <div class="activity-item">
+
+                        <div class="activity-title">
+                            {{ planting.crop.name }}
+                            —
+                            {{ planting.variety.name }}
+                        </div>
+
+                        <div class="activity-meta">
+                            {{ planting.field.farm.name }}
+                            ·
+                            {{ planting.field.name }}
+                            ·
+                            Planted {{ planting.planting_date }}
+                            ·
+                            {{ planting.get_status_display }}
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                No planting attempts have been recorded yet.
+            </div>
+
+        {% endif %}
+
+        <div class="dashboard-actions">
+
+            <a href="{% url 'planting:create' %}" class="btn btn-primary">
+                Record planting
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="dashboard-card">
+
+        <h2>Recent Inspections</h2>
+
+        <p class="dashboard-card-subtitle">
+            The latest field observations recorded in ShambaSense.
+        </p>
+
+        {% if recent_inspections %}
+
+            <div class="activity-list">
+
+                {% for inspection in recent_inspections %}
+
+                    <div class="activity-item">
+
+                        <div class="activity-title">
+                            {{ inspection.planting_attempt.crop.name }}
+                            —
+                            {{ inspection.get_crop_stage_display }}
+                        </div>
+
+                        <div class="activity-meta">
+                            {{ inspection.planting_attempt.field.farm.name }}
+                            ·
+                            {{ inspection.planting_attempt.field.name }}
+                            ·
+                            {{ inspection.inspection_date }}
+                            ·
+                            {{ inspection.get_crop_condition_display }}
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                No inspections have been recorded yet.
+            </div>
+
+        {% endif %}
+
+        <div class="dashboard-actions">
+
+            <a href="{% url 'inspections:create' %}" class="btn btn-primary">
+                Record inspection
+            </a>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

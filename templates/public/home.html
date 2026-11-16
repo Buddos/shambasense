@@ -1,0 +1,72 @@
+{% extends "public/base.html" %}
+{% load static %}
+
+{% block title %}ShambaSense | Better farming decisions start in your field{% endblock %}
+
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+    <img class="hero-image" src="{% static 'images/land.png' %}?v=2" alt="A Kenyan farmer checks her crops on a tablet in a maize field at sunrise" fetchpriority="high">
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="hero-content">
+        <span class="eyebrow eyebrow-light">FIELD NOTES TO BETTER DECISIONS</span>
+        <h1 id="hero-title">Better farming decisions start in your field.</h1>
+        <p>ShambaSense helps farmers record planting activities, monitor crop establishment and understand what their crops need. Make informed decisions using observations from your own farm.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'accounts:register' %}">Get Started <span aria-hidden="true">&#8594;</span></a>
+            <a class="button button-outline" href="{% url 'accounts:login' %}">Sign In</a>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#what-you-can-do"><span aria-hidden="true">&#8595;</span> Explore ShambaSense</a>
+</section>
+
+<section class="section features-section" id="what-you-can-do" aria-labelledby="features-title">
+    <div class="section-heading">
+        <span class="eyebrow">A CLEARER VIEW OF YOUR FARM</span>
+        <h2 id="features-title">Keep the details that guide your next decision.</h2>
+        <p>Bring day-to-day farm records and field observations together in one practical workspace.</p>
+    </div>
+    <div class="feature-grid">
+        <article class="feature-item">
+            <span class="feature-index">01</span>
+            <h3>Farm Records</h3>
+            <p>Organise your farms, fields and planting activities in one place.</p>
+        </article>
+        <article class="feature-item">
+            <span class="feature-index">02</span>
+            <h3>Crop Monitoring</h3>
+            <p>Record crop conditions, inspections and important field observations.</p>
+        </article>
+        <article class="feature-item">
+            <span class="feature-index">03</span>
+            <h3>Practical Recommendations</h3>
+            <p>Receive understandable guidance based on recorded field conditions.</p>
+        </article>
+    </div>
+</section>
+
+<section class="how-section" aria-labelledby="how-title">
+    <div class="section how-inner">
+        <div class="how-intro">
+            <span class="eyebrow">HOW IT WORKS</span>
+            <h2 id="how-title">A useful picture of your season, one record at a time.</h2>
+            <p>Start with the information you already know about your farm. Add observations as your crops grow.</p>
+        </div>
+        <ol class="steps-list">
+            <li><span>01</span><p>Register your farm and fields.</p></li>
+            <li><span>02</span><p>Record your planting activities.</p></li>
+            <li><span>03</span><p>Inspect your crops and record observations.</p></li>
+            <li><span>04</span><p>Review assessments and recommendations.</p></li>
+        </ol>
+    </div>
+</section>
+
+<section class="closing-cta" aria-labelledby="closing-title">
+    <div class="closing-cta-inner">
+        <div>
+            <span class="eyebrow eyebrow-light">SHAMBASENSE</span>
+            <h2 id="closing-title">Your farm. Your observations. Better-informed decisions.</h2>
+        </div>
+        <a class="button button-light" href="{% url 'accounts:register' %}">Get Started <span aria-hidden="true">&#8594;</span></a>
+    </div>
+</section>
+{% endblock %}

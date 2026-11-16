@@ -1,0 +1,53 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Assessment Report | ShambaSense{% endblock %}
+{% block page_title %}Assessment Report{% endblock %}
+{% block extra_css %}{% include "reports/_styles.html" %}{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <div>
+        <h1>Assessment history</h1>
+        <p class="report-muted">{{ planting.crop.name }} — {{ planting.variety.name }} · {{ planting.field.farm.name }}</p>
+    </div>
+    <div class="report-actions">
+        <a class="btn btn-secondary" href="{% url 'reports:planting_detail' planting.pk %}">Planting report</a>
+        <a class="btn btn-primary" href="{% url 'reports:assessment_pdf' planting.pk %}">Download PDF</a>
+    </div>
+</div>
+
+<section class="report-card">
+    <h2>Establishment assessments</h2>
+    {% if establishment_assessments %}
+        {% for assessment in establishment_assessments %}
+            <div style="padding:14px 0;border-bottom:1px solid #e3eae5">
+                <span class="report-pill">{{ assessment.get_status_display }}</span>
+                <p class="report-muted">Inspection: {{ assessment.inspection.inspection_date }} · Rule version {{ assessment.rule_version }}</p>
+                <p>{{ assessment.summary }}</p>
+                <p class="report-muted">Emergence: {{ assessment.emergence_percentage|default:"Not recorded" }}{% if assessment.emergence_percentage != None %}%{% endif %} · Healthy plants: {{ assessment.healthy_plant_count }} · Damaged plants: {{ assessment.damaged_plant_count }}</p>
+                <a class="report-link" href="{% url 'reports:inspection_detail' assessment.inspection.pk %}">Open inspection report</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="report-empty">No establishment assessments are available for this planting.</div>
+    {% endif %}
+</section>
+
+<section class="report-card">
+    <h2>Remaining-season assessment</h2>
+    {% if season_assessment %}
+        <span class="report-pill">{{ season_assessment.get_status_display }}</span>
+        <p>{{ season_assessment.summary }}</p>
+        <dl class="report-detail">
+            <div><dt>Assessment date</dt><dd>{{ season_assessment.assessment_date }}</dd></div>
+            <div><dt>Expected maturity start</dt><dd>{{ season_assessment.expected_maturity_start|default:"Not available" }}</dd></div>
+            <div><dt>Expected maturity end</dt><dd>{{ season_assessment.expected_maturity_end|default:"Not available" }}</dd></div>
+            <div><dt>Expected season end</dt><dd>{{ season_assessment.expected_season_end_date|default:"Not recorded" }}</dd></div>
+            <div><dt>Days after planting</dt><dd>{{ season_assessment.days_after_planting|default:"Not available" }}</dd></div>
+            <div><dt>Rule version</dt><dd>{{ season_assessment.rule_version }}</dd></div>
+        </dl>
+    {% else %}
+        <div class="report-empty">No remaining-season assessment has been generated for this planting.</div>
+    {% endif %}
+</section>
+{% endblock %}

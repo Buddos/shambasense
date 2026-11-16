@@ -1,0 +1,94 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Reports | ShambaSense{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block extra_css %}
+{% include "reports/_styles.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="report-header">
+    <div>
+        <h1>Farm Reports</h1>
+        <p class="report-muted">Review your farm records, planting activities, inspections and decisions.</p>
+    </div>
+</div>
+
+<div class="report-grid">
+    <div class="report-stat"><small>Farms</small><strong>{{ summary.farm_count }}</strong></div>
+    <div class="report-stat"><small>Fields</small><strong>{{ summary.field_count }}</strong></div>
+    <div class="report-stat"><small>Plantings</small><strong>{{ summary.planting_count }}</strong></div>
+    <div class="report-stat"><small>Inspections</small><strong>{{ summary.inspection_count }}</strong></div>
+    <div class="report-stat"><small>Establishment assessments</small><strong>{{ summary.establishment_count }}</strong></div>
+    <div class="report-stat"><small>Season assessments</small><strong>{{ summary.season_assessment_count }}</strong></div>
+    <div class="report-stat"><small>Active recommendations</small><strong>{{ summary.active_recommendation_count }}</strong></div>
+    <div class="report-stat"><small>High-priority recommendations</small><strong>{{ summary.high_priority_count }}</strong></div>
+</div>
+
+<section class="report-card">
+    <h2>Your farms</h2>
+    {% if farms %}
+    <table class="report-table">
+        <thead><tr><th>Farm</th><th>County</th><th>Fields</th><th>Report</th></tr></thead>
+        <tbody>
+        {% for farm in farms %}
+            <tr>
+                <td>{{ farm.name }}</td>
+                <td>{{ farm.county|default:"Not recorded" }}</td>
+                <td>{{ farm.fields.count }}</td>
+                <td><a class="report-link" href="{% url 'reports:farm_detail' farm.pk %}">View report</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="report-empty">You have not registered a farm yet. Add a farm to start building your reports.</div>
+    {% endif %}
+</section>
+
+<section class="report-card">
+    <h2>Planting reports</h2>
+    {% if plantings %}
+    <table class="report-table">
+        <thead><tr><th>Crop</th><th>Variety</th><th>Field</th><th>Planting date</th><th>Status</th><th>Report</th></tr></thead>
+        <tbody>
+        {% for planting in plantings %}
+            <tr>
+                <td>{{ planting.crop.name }}</td>
+                <td>{{ planting.variety.name }}</td>
+                <td>{{ planting.field.name }}</td>
+                <td>{{ planting.planting_date }}</td>
+                <td>{{ planting.get_status_display }}</td>
+                <td><a class="report-link" href="{% url 'reports:planting_detail' planting.pk %}">View report</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="report-empty">No planting records are available yet.</div>
+    {% endif %}
+</section>
+
+<section class="report-card">
+    <h2>Recent inspections</h2>
+    {% if inspections %}
+    <table class="report-table">
+        <thead><tr><th>Date</th><th>Crop</th><th>Field</th><th>Condition</th><th>Report</th></tr></thead>
+        <tbody>
+        {% for inspection in inspections %}
+            <tr>
+                <td>{{ inspection.inspection_date }}</td>
+                <td>{{ inspection.planting_attempt.crop.name }}</td>
+                <td>{{ inspection.planting_attempt.field.name }}</td>
+                <td>{{ inspection.get_crop_condition_display }}</td>
+                <td><a class="report-link" href="{% url 'reports:inspection_detail' inspection.pk %}">View report</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="report-empty">No inspections have been recorded yet.</div>
+    {% endif %}
+</section>
+{% endblock %}

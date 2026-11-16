@@ -1,0 +1,40 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>Delete Planting Record</h1>
+
+        <p>
+            Are you sure you want to delete the planting record for
+            <strong>{{ planting.crop.name }}</strong>
+            — {{ planting.variety.name }}
+            on
+            <strong>{{ planting.field.name }}</strong>?
+        </p>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger">
+                Yes, Delete
+            </button>
+
+            <a
+                href="{% url 'planting:detail' planting.pk %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,322 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container">
+
+    <div class="page-header">
+        <div>
+            <h1>Inspection Details</h1>
+            <p>
+                {{ inspection.planting_attempt.crop.name }}
+                — {{ inspection.inspection_date|date:"d M Y" }}
+            </p>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'inspections:update' inspection.pk %}"
+               class="btn btn-primary">
+                Edit Inspection
+            </a>
+
+            <a href="{% url 'inspections:delete' inspection.pk %}"
+               class="btn btn-danger">
+                Delete
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Summary Statistics -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span class="stat-label">Emergence Rate</span>
+            <h2>
+                {% if inspection.emergence_percentage != None %}
+                    {{ inspection.emergence_percentage }}%
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Days After Planting</span>
+            <h2>{{ inspection.days_after_planting }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Stations Observed</span>
+            <h2>{{ inspection.planting_stations_observed }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-label">Stations With Emergence</span>
+            <h2>{{ inspection.stations_with_emergence }}</h2>
+        </div>
+
+    </div>
+
+
+    <!-- Planting Information -->
+    <div class="card">
+        <h3>Planting Information</h3>
+
+        <dl class="detail-list">
+
+            <dt>Crop</dt>
+            <dd>
+                {{ inspection.planting_attempt.crop.name }}
+            </dd>
+
+            <dt>Variety</dt>
+            <dd>
+                {{ inspection.planting_attempt.variety.name }}
+            </dd>
+
+            <dt>Farm</dt>
+            <dd>
+                {{ inspection.planting_attempt.field.farm.name }}
+            </dd>
+
+            <dt>Field</dt>
+            <dd>
+                {{ inspection.planting_attempt.field.name }}
+            </dd>
+
+            <dt>Planting Date</dt>
+            <dd>
+                {{ inspection.planting_attempt.planting_date|date:"d M Y" }}
+            </dd>
+
+            <dt>Inspection Date</dt>
+            <dd>
+                {{ inspection.inspection_date|date:"d M Y" }}
+            </dd>
+
+            <dt>Inspector</dt>
+            <dd>
+                {% if inspection.inspected_by %}
+                    {{ inspection.inspected_by.get_username }}
+                {% else %}
+                    Not recorded
+                {% endif %}
+            </dd>
+
+        </dl>
+    </div>
+
+
+    <!-- Crop Establishment -->
+    <div class="card">
+        <h3>Crop Establishment</h3>
+
+        <dl class="detail-list">
+
+            <dt>Crop Stage</dt>
+            <dd>
+                {{ inspection.get_crop_stage_display }}
+            </dd>
+
+            <dt>Planting Stations Observed</dt>
+            <dd>
+                {{ inspection.planting_stations_observed }}
+            </dd>
+
+            <dt>Stations With Emergence</dt>
+            <dd>
+                {{ inspection.stations_with_emergence }}
+            </dd>
+
+            <dt>Healthy Plants Observed</dt>
+            <dd>
+                {{ inspection.healthy_plant_count }}
+            </dd>
+
+            <dt>Damaged Plants Observed</dt>
+            <dd>
+                {{ inspection.damaged_plant_count }}
+            </dd>
+
+            <dt>Emergence Percentage</dt>
+            <dd>
+                {% if inspection.emergence_percentage != None %}
+                    {{ inspection.emergence_percentage }}%
+                {% else %}
+                    Not available
+                {% endif %}
+            </dd>
+
+        </dl>
+    </div>
+
+
+    <!-- Establishment Assessment -->
+    {% if inspection.establishment_assessment %}
+
+        <div class="card">
+            <h3>Establishment Assessment</h3>
+
+            <dl class="detail-list">
+
+                <dt>Status</dt>
+                <dd>
+                    {{ inspection.establishment_assessment.get_status_display }}
+                </dd>
+
+                <dt>Emergence Percentage</dt>
+                <dd>
+                    {% if inspection.establishment_assessment.emergence_percentage != None %}
+                        {{ inspection.establishment_assessment.emergence_percentage }}%
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </dd>
+
+                <dt>Healthy Plants</dt>
+                <dd>
+                    {{ inspection.establishment_assessment.healthy_plant_count }}
+                </dd>
+
+                <dt>Damaged Plants</dt>
+                <dd>
+                    {{ inspection.establishment_assessment.damaged_plant_count }}
+                </dd>
+
+                <dt>Rule Version</dt>
+                <dd>
+                    {{ inspection.establishment_assessment.rule_version }}
+                </dd>
+
+                <dt>Assessment Time</dt>
+                <dd>
+                    {{ inspection.establishment_assessment.assessed_at|date:"d M Y H:i" }}
+                </dd>
+
+            </dl>
+        </div>
+
+
+        <!-- Assessment Summary -->
+        <div class="card">
+            <h3>Assessment Summary</h3>
+
+            <p>
+                {{ inspection.establishment_assessment.summary }}
+            </p>
+        </div>
+
+
+        <!-- Assessment Findings -->
+        {% if inspection.establishment_assessment.findings %}
+
+            <div class="card">
+                <h3>Assessment Findings</h3>
+
+                <ul class="detail-list">
+
+                    {% for finding in inspection.establishment_assessment.findings %}
+
+                        <li>
+                            <strong>
+                                {{ finding.level|title }}
+                            </strong>
+
+                            <p>
+                                {{ finding.message }}
+                            </p>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="card">
+            <h3>Establishment Assessment</h3>
+
+            <p>
+                No establishment assessment is available for this inspection.
+            </p>
+        </div>
+
+    {% endif %}
+
+
+    <!-- Field Conditions -->
+    <div class="card">
+        <h3>Field Conditions</h3>
+
+        <dl class="detail-list">
+
+            <dt>Crop Condition</dt>
+            <dd>
+                {{ inspection.get_crop_condition_display }}
+            </dd>
+
+            <dt>Soil Moisture</dt>
+            <dd>
+                {{ inspection.get_soil_moisture_display }}
+            </dd>
+
+            <dt>Weed Pressure</dt>
+            <dd>
+                {{ inspection.get_weed_pressure_display }}
+            </dd>
+
+            <dt>Pest or Disease Signs</dt>
+            <dd>
+                {% if inspection.pest_or_disease_signs %}
+                    Yes
+                {% else %}
+                    No
+                {% endif %}
+            </dd>
+
+        </dl>
+    </div>
+
+
+    <!-- Observations and Actions -->
+    <div class="card">
+        <h3>Observations and Actions</h3>
+
+        <dl class="detail-list">
+
+            <dt>Field Observations</dt>
+            <dd>
+                {{ inspection.observations|default:"No additional observations recorded."|linebreaksbr }}
+            </dd>
+
+            <dt>Actions Taken</dt>
+            <dd>
+                {{ inspection.actions_taken|default:"No actions recorded."|linebreaksbr }}
+            </dd>
+
+            <dt>Follow-up Date</dt>
+            <dd>
+                {% if inspection.follow_up_date %}
+                    {{ inspection.follow_up_date|date:"d M Y" }}
+                {% else %}
+                    Not scheduled
+                {% endif %}
+            </dd>
+
+        </dl>
+    </div>
+
+
+    <!-- Navigation -->
+    <div class="form-actions">
+        <a href="{% url 'inspections:list' %}"
+           class="btn btn-secondary">
+            Back to Inspections
+        </a>
+    </div>
+
+</div>
+{% endblock %}

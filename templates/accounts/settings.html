@@ -1,0 +1,81 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Platform Settings | ShambaSense{% endblock %}
+
+{% block page_title %}Platform Settings{% endblock %}
+
+{% block content %}
+<section class="account-page settings-page">
+    <div class="account-page-heading">
+        <div>
+            <span class="eyebrow">WORKSPACE CONFIGURATION</span>
+            <h1>Platform settings</h1>
+            <p>Regional defaults and platform features currently applied to your workspace.</p>
+        </div>
+        <a class="account-heading-link" href="{% url 'accounts:profile' %}">
+            View profile <span aria-hidden="true">&#8594;</span>
+        </a>
+    </div>
+
+    <div class="settings-overview-grid">
+        <section class="settings-clock-panel" aria-labelledby="platform-time-title">
+            <span class="eyebrow">LOCAL PLATFORM TIME</span>
+            <h2 id="platform-time-title">{{ platform_settings.current_time|date:"H:i" }}</h2>
+            <p>{{ platform_settings.current_time|date:"l, d F Y" }}</p>
+            <span class="settings-timezone">{{ platform_settings.time_zone }}</span>
+        </section>
+
+        <section class="settings-panel" aria-labelledby="regional-settings-title">
+            <div class="settings-panel-heading">
+                <div class="settings-panel-mark" aria-hidden="true">R</div>
+                <div>
+                    <h2 id="regional-settings-title">Regional defaults</h2>
+                    <p>Used for dates and localized platform content.</p>
+                </div>
+            </div>
+
+            <dl class="settings-list">
+                <div class="settings-row">
+                    <dt>Platform language</dt>
+                    <dd>{{ platform_settings.language }}</dd>
+                </div>
+                <div class="settings-row">
+                    <dt>Area measurement</dt>
+                    <dd>{{ platform_settings.area_unit }}</dd>
+                </div>
+                <div class="settings-row">
+                    <dt>Example date display</dt>
+                    <dd>{{ platform_settings.current_time|date:"d M Y" }}</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <section class="settings-capabilities" aria-labelledby="settings-capabilities-title">
+        <div class="settings-capabilities-heading">
+            <div>
+                <span class="eyebrow">PLATFORM FEATURES</span>
+                <h2 id="settings-capabilities-title">Localization and time handling</h2>
+            </div>
+        </div>
+        <div class="settings-capability-grid">
+            <article class="settings-capability">
+                <span class="settings-capability-status {% if platform_settings.internationalization %}is-enabled{% else %}is-disabled{% endif %}"></span>
+                <div>
+                    <h3>Language localization</h3>
+                    <p>{% if platform_settings.internationalization %}Localized language support is enabled.{% else %}Localized language support is disabled.{% endif %}</p>
+                </div>
+                <strong>{% if platform_settings.internationalization %}Enabled{% else %}Disabled{% endif %}</strong>
+            </article>
+            <article class="settings-capability">
+                <span class="settings-capability-status {% if platform_settings.time_zone_support %}is-enabled{% else %}is-disabled{% endif %}"></span>
+                <div>
+                    <h3>Time zone conversion</h3>
+                    <p>{% if platform_settings.time_zone_support %}Dates and times use the configured local time zone.{% else %}Time zone conversion is disabled.{% endif %}</p>
+                </div>
+                <strong>{% if platform_settings.time_zone_support %}Enabled{% else %}Disabled{% endif %}</strong>
+            </article>
+        </div>
+    </section>
+</section>
+{% endblock %}

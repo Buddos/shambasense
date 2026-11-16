@@ -1,0 +1,54 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}{{ variety.name }} | ShambaSense{% endblock %}
+
+{% block page_title %}{{ variety.name }}{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">CROP VARIETY</span>
+
+            <h1>{{ variety.name }}</h1>
+
+            <p>
+                {{ variety.crop.name }}
+            </p>
+        </div>
+
+        <a href="{% url 'crops:detail' variety.crop.pk %}"
+           class="secondary-button">
+            Back to crop
+        </a>
+    </div>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <span>Crop</span>
+            <strong>{{ variety.crop.name }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Minimum maturity</span>
+            <strong>{{ variety.maturity_days_min }} days</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Maximum maturity</span>
+            <strong>{{ variety.maturity_days_max }} days</strong>
+        </div>
+
+    </div>
+
+    {% if variety.description %}
+        <div class="notes-card">
+            <h3>About this variety</h3>
+            <p>{{ variety.description }}</p>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}

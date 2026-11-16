@@ -1,0 +1,110 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}My Account | ShambaSense{% endblock %}
+
+{% block page_title %}My Account{% endblock %}
+
+{% block content %}
+<section class="account-page">
+    <div class="account-page-heading">
+        <div>
+            <span class="eyebrow">ACCOUNT</span>
+            <h1>My account</h1>
+            <p>Your profile and recent account activity.</p>
+        </div>
+        <a class="account-heading-link" href="{% url 'accounts:settings' %}">
+            Platform settings <span aria-hidden="true">&#8594;</span>
+        </a>
+    </div>
+
+    <div class="account-profile-card">
+        <aside class="account-identity">
+            {% if account.profile_picture %}
+                <div class="account-avatar">
+                    <img src="{{ account.profile_picture.url }}" alt="Profile photo for {{ account.get_full_name|default:account.username }}">
+                </div>
+            {% else %}
+                <div class="account-avatar" aria-hidden="true">
+                    {{ account.first_name|default:account.username|first|upper }}
+                </div>
+            {% endif %}
+
+            <h2>{{ account.get_full_name|default:account.username }}</h2>
+            <p class="account-username">@{{ account.username }}</p>
+
+            <div class="account-badges">
+                <span class="account-badge account-role">{{ account.get_role_display }}</span>
+                <span class="account-badge {% if account.is_active %}account-active{% else %}account-inactive{% endif %}">
+                    {% if account.is_active %}Active account{% else %}Inactive account{% endif %}
+                </span>
+            </div>
+        </aside>
+
+        <div class="account-profile-body">
+            <section class="account-section" aria-labelledby="contact-details-title">
+                <div class="account-section-heading">
+                    <div>
+                        <h3 id="contact-details-title">Contact details</h3>
+                        <p>Information associated with your ShambaSense account.</p>
+                    </div>
+                </div>
+
+                <dl class="account-detail-grid">
+                    <div class="account-detail">
+                        <dt>Email address</dt>
+                        <dd>{{ account.email|default:"Not provided" }}</dd>
+                    </div>
+                    <div class="account-detail">
+                        <dt>Phone number</dt>
+                        <dd>{{ account.phone_number|default:"Not provided" }}</dd>
+                    </div>
+                    <div class="account-detail">
+                        <dt>Username</dt>
+                        <dd>{{ account.username }}</dd>
+                    </div>
+                    <div class="account-detail">
+                        <dt>Account role</dt>
+                        <dd>{{ account.get_role_display }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="account-section account-activity" aria-labelledby="account-activity-title">
+                <div class="account-section-heading">
+                    <div>
+                        <h3 id="account-activity-title">Account activity</h3>
+                        <p>Key dates for your account.</p>
+                    </div>
+                </div>
+
+                <dl class="account-activity-grid">
+                    <div>
+                        <dt>Member since</dt>
+                        <dd>{{ account.date_joined|date:"d M Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Last sign-in</dt>
+                        <dd>{% if account.last_login %}{{ account.last_login|date:"d M Y, H:i" }}{% else %}No sign-in recorded{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Profile last updated</dt>
+                        <dd>{{ account.updated_at|date:"d M Y, H:i" }}</dd>
+                    </div>
+                </dl>
+            </section>
+        </div>
+    </div>
+
+    <section class="account-shortcuts" aria-labelledby="workspace-shortcuts-title">
+        <div>
+            <span class="eyebrow">YOUR WORKSPACE</span>
+            <h2 id="workspace-shortcuts-title">Continue managing your farm</h2>
+        </div>
+        <div class="account-shortcut-links">
+            <a href="{% url 'farms:list' %}">Farms &amp; fields <span aria-hidden="true">&#8594;</span></a>
+            <a href="{% url 'planting:list' %}">Planting records <span aria-hidden="true">&#8594;</span></a>
+            <a href="{% url 'inspections:list' %}">Crop inspections <span aria-hidden="true">&#8594;</span></a>
+        </div>
+    </section>
+</section>
+{% endblock %}

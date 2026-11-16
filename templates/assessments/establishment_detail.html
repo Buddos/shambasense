@@ -1,0 +1,124 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Establishment Assessment | ShambaSense{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Crop Establishment Assessment</h1>
+            <p>
+                {{ planting.crop.name }} — {{ planting.variety.name }}
+                · {{ inspection.inspection_date|date:"d M Y" }}
+            </p>
+        </div>
+        <div class="form-actions">
+            <a class="btn btn-secondary"
+               href="{% url 'inspections:detail' inspection.pk %}">
+                View Inspection
+            </a>
+            <a class="btn btn-secondary"
+               href="{% url 'decision_engine:history' %}">
+                Assessment History
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Assessment Result</h2>
+        <p><strong>Status:</strong> {{ assessment.get_status_display }}</p>
+        <p>{{ assessment.summary }}</p>
+        <p>
+            <small>
+                Assessed {{ assessment.assessed_at|date:"d M Y, H:i" }}
+                · Rule version {{ assessment.rule_version }}
+            </small>
+        </p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-label">Emergence</span>
+            <h2>
+                {% if assessment.emergence_percentage != None %}
+                    {{ assessment.emergence_percentage }}%
+                {% else %}
+                    —
+                {% endif %}
+            </h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Healthy Plants</span>
+            <h2>{{ assessment.healthy_plant_count }}</h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Damaged Plants</span>
+            <h2>{{ assessment.damaged_plant_count }}</h2>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Days After Planting</span>
+            <h2>{{ inspection.days_after_planting }}</h2>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Assessment Findings</h2>
+        {% if assessment.findings %}
+            {% for finding in assessment.findings %}
+                <div class="card">
+                    <p><strong>{{ finding.code|title|cut:"_" }}</strong></p>
+                    <p>{{ finding.message }}</p>
+                    <small>Finding level: {{ finding.level|title }}</small>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No findings were recorded for this assessment.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Generated Recommendations</h2>
+        {% if recommendations %}
+            {% for recommendation in recommendations %}
+                <div class="card">
+                    <div class="page-header">
+                        <div>
+                            <h3>{{ recommendation.title }}</h3>
+                            <p>
+                                {{ recommendation.get_priority_display }}
+                                · {{ recommendation.get_status_display }}
+                                {% if not recommendation.is_active %}
+                                    · Historical
+                                {% endif %}
+                            </p>
+                        </div>
+                        <a class="btn btn-secondary"
+                           href="{% url 'recommendations:detail' recommendation.pk %}">
+                            View
+                        </a>
+                    </div>
+                    <p>{{ recommendation.explanation }}</p>
+                    <p><strong>Suggested action:</strong> {{ recommendation.recommended_action }}</p>
+                    {% if recommendation.follow_up_date %}
+                        <p>Follow-up: {{ recommendation.follow_up_date|date:"d M Y" }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No recommendations are linked to this assessment.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Related Records</h2>
+        <p><strong>Farm:</strong> {{ planting.field.farm.name }}</p>
+        <p><strong>Field:</strong> {{ planting.field.name }}</p>
+        <p><strong>Planting date:</strong> {{ planting.planting_date|date:"d M Y" }}</p>
+        <p><strong>Inspection date:</strong> {{ inspection.inspection_date|date:"d M Y" }}</p>
+        <a class="btn btn-primary"
+           href="{% url 'planting:detail' planting.pk %}">
+            View Planting
+        </a>
+    </div>
+</div>
+{% endblock %}

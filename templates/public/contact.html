@@ -1,0 +1,52 @@
+{% extends "public/base.html" %}
+
+{% block title %}Contact ShambaSense{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero-plain">
+    <div class="page-hero-inner">
+        <span class="eyebrow">WE’RE HERE TO LISTEN</span>
+        <h1>Get in touch.</h1>
+        <p>Have a question, need assistance or want to share feedback? We would like to hear from you.</p>
+    </div>
+</section>
+
+<section class="section contact-layout">
+    <div class="contact-intro">
+        <span class="eyebrow">CONTACT SHAMBASENSE</span>
+        <h2>Tell us what you need.</h2>
+        <p>Send a message using the form. Include enough detail for us to understand your question, but avoid sharing sensitive account information.</p>
+        <div class="contact-detail">
+            <span class="contact-detail-label">Email</span>
+            {% if contact_email %}
+                <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+            {% else %}
+                <span>Contact email not yet configured</span>
+            {% endif %}
+        </div>
+        <div class="contact-detail">
+            <span class="contact-detail-label">Response</span>
+            <span>We will reply to the email address you provide.</span>
+        </div>
+    </div>
+
+    <div class="contact-form-wrap">
+        <form class="contact-form" method="post" action="{% url 'pages:contact' %}" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-error-summary" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in form %}
+                <div class="public-form-group{% if field.errors %} has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}<span class="form-field-error">{{ error }}</span>{% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button class="button button-primary form-submit" type="submit">Send Message <span aria-hidden="true">&#8594;</span></button>
+        </form>
+    </div>
+</section>
+{% endblock %}
